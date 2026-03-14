@@ -1,26 +1,5 @@
-import { StyleSheet, Text, View } from "react-native"
+import QRScreen from "../../src/screens/client/QRScreen"
 
-export default function QRManagementScreen() {
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>QR Management</Text>
-      <Text>Generate and manage QR codes here.</Text>
-    </View>
-  )
-
+export default function Page() {
+  return <QRScreen />
 }
-
-const styles = StyleSheet.create({
-
-  container: {
-    flex: 1
-  },
-
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 10
-  }
-
-})

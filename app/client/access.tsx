@@ -1,26 +1,5 @@
-import { StyleSheet, Text, View } from "react-native"
+import AccessScreen from "../../src/screens/client/AccessScreen"
 
-export default function AccessControlScreen() {
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Access Control</Text>
-      <Text>Manage permissions and access rights.</Text>
-    </View>
-  )
-
+export default function Page() {
+  return <AccessScreen />
 }
-
-const styles = StyleSheet.create({
-
-  container: {
-    flex: 1
-  },
-
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 10
-  }
-
-})

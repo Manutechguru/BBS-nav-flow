@@ -1,26 +1,5 @@
-import { StyleSheet, Text, View } from "react-native"
+import ReportsScreen from "../../src/screens/client/ReportsScreen"
 
-export default function ReportsScreen() {
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Reports</Text>
-      <Text>Reports and analytics will appear here.</Text>
-    </View>
-  )
-
+export default function Page() {
+  return <ReportsScreen />
 }
-
-const styles = StyleSheet.create({
-
-  container: {
-    flex: 1
-  },
-
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 10
-  }
-
-})
