@@ -1,111 +1,500 @@
-import { useRouter } from "expo-router"
-import { useState } from "react"
-import { Alert } from "react-native"
-import { Button, Card, TextInput } from "react-native-paper"
+import React, { useEffect, useState } from "react";
+import {
+    FlatList,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from "react-native";
 
-import { detectLoginType } from "../hooks/useLoginDetect"
-import { loginUser } from "../utils/auth"
+import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
-export default function LoginCard() {
+import { detectLoginType } from "../hooks/useLoginDetect";
+import { loginUser } from "../utils/auth";
 
-  const router = useRouter()
 
-  const [input, setInput] = useState("")
-  const [password, setPassword] = useState("")
-  const [otp, setOtp] = useState("")
-  const [loginType, setLoginType] =
-    useState<"username" | "email" | "phone">("username")
+export default function LoginScreen(){
 
-  const handleChange = (text: string) => {
+const router = useRouter();
 
-    setInput(text)
+const [password,setPassword] = useState("");
+const [loginInput,setLoginInput] = useState("");
+const [loginType,setLoginType] = useState("username");
+const [otpValue,setOtpValue] = useState("");
 
-    const type = detectLoginType(text)
+const [step,setStep] = useState(1);
 
-    setLoginType(type)
+const [countryOpen,setCountryOpen] = useState(false);
+const [search,setSearch] = useState("");
 
-  }
 
-  const handleLogin = () => {
+const countries = [
+{code:"IN",name:"India",dial:"+91"},
+{code:"US",name:"United States",dial:"+1"},
+{code:"GB",name:"United Kingdom",dial:"+44"},
+{code:"CA",name:"Canada",dial:"+1"},
+{code:"AU",name:"Australia",dial:"+61"}
+];
 
-    try {
+const [country,setCountry] = useState(countries[0]);
+useEffect(() => {
 
-      const credential = loginType === "phone" ? otp : password
+const detectCountry = async () => {
 
-      const user = loginUser(input, credential, loginType)
+  try {
 
-      if (!user) {
-        Alert.alert("Login Failed", "Invalid credentials")
-        return
-      }
+    const res = await fetch("https://ipwho.is/");
+    const data = await res.json();
 
-      if (user.role === "super_admin") {
-        router.push("/admin/dashboard")
-      }
+    const found = countries.find(c => c.code === data.country_code);
 
-      else if (user.role === "client_admin") {
-        router.push("/client/dashboard")
-      }
-
-      else if (user.role === "staff") {
-        router.push("/staff/dashboard")
-      }
-
-    } catch (error: any) {
-
-      Alert.alert("Login Failed", error.message)
-
+    if(found){
+      setCountry(found);
     }
 
+  } catch(error){
+    console.log("Country detect error:", error);
   }
 
-  return (
+};
 
-    <Card style={{ width: 400, padding: 20 }}>
+detectCountry();
 
-      <Card.Title title="Login" />
+}, []);
 
-      <Card.Content>
+const filteredCountries = countries.filter(c =>
+c.name.toLowerCase().includes(search.toLowerCase())
+);
 
-        <TextInput
-          label="Username / Email / Phone"
-          value={input}
-          onChangeText={handleChange}
-          mode="outlined"
-          style={{ marginBottom: 15 }}
-        />
+const handleInputChange = (value) => {
 
-        {loginType === "phone" ? (
+  setLoginInput(value);
 
-          <TextInput
-            label="OTP"
-            value={otp}
-            keyboardType="numeric"
-            maxLength={6}
-            onChangeText={setOtp}
-          />
+  const type = detectLoginType(value);
 
-        ) : (
+  setLoginType(type);
 
-          <TextInput
-            label="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-            mode="outlined"
-            style={{ marginBottom: 15 }}
-          />
+  if(type === "phone" && loginInput.length === 0){
+  setCountryOpen(true);
+}else if(type !== "phone"){
+  setCountryOpen(false);
+}
 
-        )}
+};
 
-        <Button mode="contained" onPress={handleLogin}>
-          Login
-        </Button>
+const handleContinue = () => {
 
-      </Card.Content>
+  if(loginType === "phone"){
+    setStep(2);
+  }else{
+    setStep(3);
+  }
 
-    </Card>
+};
 
-  )
+const handleUserLogin = async () => {
+
+ try{
+
+  const credential = loginType === "phone" ? otpValue : password;
+
+  const user = await loginUser(loginInput, credential, loginType);
+
+  if(!user){
+    alert("Login Failed");
+    return;
+  }
+
+  if(user.role === "super_admin"){
+    router.push("/admin/dashboard");
+  }
+
+  else if(user.role === "client_admin"){
+    router.push("/client/dashboard");
+  }
+
+  else if(user.role === "staff"){
+    router.push("/staff/dashboard");
+  }
+
+ }catch(error){
+
+  console.log(error);
+  alert("Login error");
+
+ }
+
+};
+
+return(
+
+<View style={styles.page}>
+
+<View style={styles.card}>
+
+<View style={styles.leftPanel}>
+
+<View style={styles.logoRow}>
+<View style={styles.logoBox}>
+<Text style={styles.logoText}>BBS</Text>
+</View>
+
+<Text style={styles.logoLabel}>Bojhan</Text>
+</View>
+
+<Text style={styles.brandTitle}>
+Bojhan{"\n"}Billing System
+</Text>
+
+</View>
+
+<View style={styles.rightPanel}>
+
+{step === 1 && (
+
+<View>
+
+<Text style={styles.heading}>Secure Login</Text>
+<Text style={styles.subHeading}>Enter your credentials to proceed</Text>
+
+<Text style={styles.label}>Phone / Email / Username</Text>
+
+{loginType === "phone" ? (
+
+<View style={styles.phoneRow}>
+
+<TouchableOpacity
+style={styles.countryBox}
+onPress={()=>setCountryOpen(!countryOpen)}
+>
+
+<Text style={styles.countryCode}>{country.code}</Text>
+<Text>{country.dial} ▼</Text>
+
+</TouchableOpacity>
+
+<View style={styles.phoneInput}>
+
+<TextInput
+placeholder="Enter mobile number"
+style={styles.inputField}
+value={loginInput}
+onChangeText={handleInputChange}
+/>
+
+</View>
+
+</View>
+
+) : (
+
+<View style={styles.inputBox}>
+
+<Feather
+name={loginType === "email" ? "mail" : "user"}
+size={18}
+color="#888"
+/>
+<TextInput
+placeholder="Enter phone, email or username"
+style={styles.inputField}
+value={loginInput}
+onChangeText={handleInputChange}
+/>
+
+</View>
+
+)}
+
+{loginType === "phone" && countryOpen && (
+
+<View style={styles.dropdown}>
+
+<TextInput
+placeholder="Search country"
+style={styles.search}
+value={search}
+onChangeText={setSearch}
+/>
+
+<FlatList
+data={filteredCountries}
+keyExtractor={(item)=>item.code}
+renderItem={({item})=>(
+<TouchableOpacity
+style={styles.countryItem}
+onPress={()=>{
+ setCountry(item)
+ setCountryOpen(false)
+}}
+>
+<Text>{item.name}</Text>
+<Text>{item.dial}</Text>
+</TouchableOpacity>
+)}
+/>
+
+</View>
+
+)}
+
+{/* PASSWORD FIELD FOR EMAIL/USERNAME */}
+
+{loginType !== "phone" && loginInput !== "" && (
+
+<View>
+
+<Text style={styles.label}>Password</Text>
+
+<View style={styles.inputBox}>
+
+<Feather name="lock" size={18} color="#888" />
+
+<TextInput
+secureTextEntry
+placeholder="Enter password"
+style={styles.inputField}
+value={password}
+onChangeText={setPassword}
+/>
+
+</View>
+
+</View>
+
+)}
+
+<LinearGradient
+colors={["#2f6fed","#1a4db6"]}
+style={styles.button}
+>
+
+<TouchableOpacity
+style={{width:"100%",alignItems:"center"}}
+onPress={()=>{
+ if(loginType === "phone"){
+   handleContinue();
+ }else{
+   handleUserLogin();
+ }
+}}
+>
+
+<Text style={styles.buttonText}>
+{loginType === "phone" ? "Send OTP →" : "Login →"}
+</Text>
+
+</TouchableOpacity>
+
+</LinearGradient>
+
+</View>
+
+)}
+
+{step === 2 && (
+
+<View>
+
+<Text style={styles.heading}>Verify Phone</Text>
+<Text style={styles.subHeading}>Enter OTP sent to your number</Text>
+
+<Text style={styles.label}>Enter OTP</Text>
+
+<View style={styles.inputBox}>
+<TextInput
+placeholder="Enter OTP"
+style={styles.inputField}
+value={otpValue}
+onChangeText={setOtpValue}
+/>
+</View>
+
+<LinearGradient
+colors={["#2f6fed","#1a4db6"]}
+style={styles.button}
+>
+
+<TouchableOpacity
+style={{width:"100%",alignItems:"center"}}
+onPress={handleUserLogin}
+>
+
+<Text style={styles.buttonText}>
+Login →
+</Text>
+
+</TouchableOpacity>
+
+</LinearGradient>
+
+</View>
+
+)}
+
+</View>
+
+</View>
+
+</View>
+
+);
 
 }
+
+const styles = StyleSheet.create({
+
+page:{
+flex:1,
+backgroundColor:"#eef2f7",
+justifyContent:"center",
+alignItems:"center"
+},
+
+card:{
+width:1000,
+height:600,
+flexDirection:"row",
+backgroundColor:"#fff",
+borderRadius:28,
+overflow:"hidden"
+},
+
+leftPanel:{
+width:"50%",
+backgroundColor:"#2f6fed",
+justifyContent:"center",
+alignItems:"center"
+},
+
+logoRow:{
+flexDirection:"row",
+alignItems:"center",
+marginBottom:30
+},
+
+logoBox:{
+backgroundColor:"#fff",
+padding:8,
+borderRadius:10
+},
+
+logoText:{
+fontWeight:"bold"
+},
+
+logoLabel:{
+color:"#fff",
+marginLeft:10
+},
+
+brandTitle:{
+fontSize:48,
+color:"#fff",
+fontWeight:"700",
+lineHeight:56
+},
+
+rightPanel:{
+width:"50%",
+justifyContent:"center",
+paddingHorizontal:80
+},
+
+heading:{
+fontSize:32,
+fontWeight:"700"
+},
+
+subHeading:{
+color:"#666",
+marginBottom:25
+},
+
+label:{
+marginBottom:6
+},
+
+phoneRow:{
+flexDirection:"row",
+alignItems:"center",
+marginBottom:15
+},
+
+countryBox:{
+flexDirection:"row",
+alignItems:"center",
+borderWidth:1,
+borderColor:"#d7dce3",
+borderRadius:12,
+padding:12,
+marginRight:10
+},
+
+countryCode:{
+marginRight:6
+},
+
+phoneInput:{
+flex:1,
+flexDirection:"row",
+alignItems:"center",
+borderWidth:1,
+borderColor:"#d7dce3",
+borderRadius:12,
+paddingHorizontal:12
+},
+
+inputBox:{
+flexDirection:"row",
+alignItems:"center",
+borderWidth:1,
+borderColor:"#d7dce3",
+borderRadius:12,
+paddingHorizontal:12,
+marginBottom:20,
+gap:10
+},
+
+inputField:{
+flex:1,
+padding:16
+},
+
+button:{
+marginTop:25,
+padding:20,
+borderRadius:30,
+alignItems:"center"
+},
+
+buttonText:{
+color:"#fff",
+fontWeight:"600"
+},
+
+dropdown:{
+backgroundColor:"#fff",
+borderWidth:1,
+borderColor:"#ddd",
+borderRadius:12,
+marginBottom:10,
+maxHeight:220
+},
+
+search:{
+padding:10,
+borderBottomWidth:1,
+borderColor:"#eee"
+},
+
+countryItem:{
+flexDirection:"row",
+justifyContent:"space-between",
+padding:12
+}
+
+});
