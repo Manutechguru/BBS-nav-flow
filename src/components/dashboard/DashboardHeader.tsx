@@ -1,10 +1,10 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
-    Pressable,
-    StyleSheet,
-    Text,
-    View
+  Pressable,
+  StyleSheet,
+  Text,
+  View
 } from "react-native";
 
 export default function DashboardHeader({ onCustomizeColumns }: any) {
@@ -13,6 +13,18 @@ export default function DashboardHeader({ onCustomizeColumns }: any) {
 
   const handleAddClient = () => {
     router.push("/admin/add-client");
+  };
+
+  const handleLogout = () => {
+
+    /* clear any session storage */
+
+    localStorage.removeItem("auth_token");
+
+    /* redirect to login page */
+
+    router.replace("/");
+
   };
 
   return (
@@ -32,13 +44,14 @@ export default function DashboardHeader({ onCustomizeColumns }: any) {
 
       </View>
 
-      {/* RIGHT SIDE BUTTONS */}
+      {/* RIGHT SIDE */}
       <View style={styles.actions}>
 
         {/* Customize Columns */}
         <Pressable
-          style={({ pressed }) => [
+          style={({ hovered, pressed }) => [
             styles.customBtn,
+            hovered && styles.customHover,
             pressed && styles.btnPressed
           ]}
           onPress={onCustomizeColumns}
@@ -58,8 +71,9 @@ export default function DashboardHeader({ onCustomizeColumns }: any) {
 
         {/* Add Client */}
         <Pressable
-          style={({ pressed }) => [
+          style={({ hovered, pressed }) => [
             styles.addBtn,
+            hovered && styles.addHover,
             pressed && styles.btnPressed
           ]}
           onPress={handleAddClient}
@@ -68,6 +82,24 @@ export default function DashboardHeader({ onCustomizeColumns }: any) {
           <Text style={styles.addText}>
             + Add New Client
           </Text>
+
+        </Pressable>
+
+        {/* Logout */}
+        <Pressable
+          style={({ hovered, pressed }) => [
+            styles.logoutBtn,
+            hovered && styles.logoutHover,
+            pressed && styles.btnPressed
+          ]}
+          onPress={handleLogout}
+        >
+
+          <MaterialIcons
+            name="logout"
+            size={20}
+            color="#DC2626"
+          />
 
         </Pressable>
 
@@ -102,8 +134,11 @@ const styles = StyleSheet.create({
 
   actions: {
     flexDirection: "row",
-    gap: 12
+    gap: 12,
+    alignItems: "center"
   },
+
+  /* Customize Button */
 
   customBtn: {
     flexDirection: "row",
@@ -117,11 +152,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF"
   },
 
+  customHover: {
+    backgroundColor: "#F9FAFB"
+  },
+
   customText: {
     fontSize: 14,
     color: "#374151",
     fontWeight: "500"
   },
+
+  /* Add Client Button */
 
   addBtn: {
     backgroundColor: "#2563EB",
@@ -130,10 +171,30 @@ const styles = StyleSheet.create({
     borderRadius: 6
   },
 
+  addHover: {
+    backgroundColor: "#1D4ED8"
+  },
+
   addText: {
     color: "#FFFFFF",
     fontWeight: "600",
     fontSize: 14
+  },
+
+  /* Logout Button */
+
+  logoutBtn: {
+    borderWidth: 1,
+    borderColor: "#FCA5A5",
+    backgroundColor: "#FFFFFF",
+    padding: 8,
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+
+  logoutHover: {
+    backgroundColor: "#FEF2F2"
   },
 
   btnPressed: {

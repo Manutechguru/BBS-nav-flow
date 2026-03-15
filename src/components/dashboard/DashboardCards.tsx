@@ -1,30 +1,55 @@
 import { View } from "react-native"
 import { Card, Text } from "react-native-paper"
+import { useClients } from "../../context/ClientsContext"
 
 export default function DashboardCards(){
 
-const cards = [
-{title:"Total Clients",value:"6"},
-{title:"Payment Overdue",value:"1"},
-{title:"Total Outlets",value:"21"},
-{title:"Paid This Month",value:"4"}
-]
+  const { clients } = useClients()
 
-return(
+  /* ---------- CALCULATE METRICS ---------- */
 
-<View style={{flexDirection:"row",gap:20}}>
+  const totalClients = clients.length
 
-{cards.map((c,i)=>(
+  const paymentOverdue = clients.filter(
+    (c:any) => c.paymentStatus === "Due"
+  ).length
 
-<Card key={i} style={{flex:1,padding:20}}>
-<Text>{c.title}</Text>
-<Text variant="headlineMedium">{c.value}</Text>
-</Card>
+  const paidClients = clients.filter(
+    (c:any) => c.paymentStatus === "Paid"
+  ).length
 
-))}
+  const totalOutlets = clients.reduce(
+    (sum:number, c:any) => sum + (Number(c.numberOfOutlets) || 0),
+    0
+  )
 
-</View>
+  const cards = [
 
-)
+    { title: "Total Clients", value: totalClients },
+
+    { title: "Payment Overdue", value: paymentOverdue },
+
+    { title: "Total Outlets", value: totalOutlets },
+
+    { title: "Paid This Month", value: paidClients }
+
+  ]
+
+  return(
+
+    <View style={{ flexDirection:"row", gap:20 }}>
+
+      {cards.map((c,i)=>(
+
+        <Card key={i} style={{ flex:1, padding:20 }}>
+          <Text>{c.title}</Text>
+          <Text variant="headlineMedium">{c.value}</Text>
+        </Card>
+
+      ))}
+
+    </View>
+
+  )
 
 }
