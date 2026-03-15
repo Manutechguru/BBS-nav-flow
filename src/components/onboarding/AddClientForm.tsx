@@ -1,15 +1,19 @@
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 
+import { MaterialIcons } from "@expo/vector-icons";
+
 import * as DocumentPicker from "expo-document-picker";
-import { Button, Portal, Snackbar, TextInput } from "react-native-paper";
+import { Portal, Snackbar, TextInput } from "react-native-paper";
 
 import { clientFormConfig } from "../../constants/clientFormConfig";
 import { useClients } from "../../context/ClientsContext";
@@ -24,6 +28,9 @@ export default function AddClientForm() {
 
   const [form, setForm] = useState<any>({});
   const [errors, setErrors] = useState<any>({});
+
+  const [hoverCancel, setHoverCancel] = useState(false);
+  const [hoverAdd, setHoverAdd] = useState(false);
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -120,7 +127,7 @@ export default function AddClientForm() {
     );
 
     setTimeout(() => {
-      router.back();
+      router.push("/admin/dashboard");
     }, 1200);
   };
 
@@ -234,38 +241,34 @@ export default function AddClientForm() {
 
     }
 
-    if (field.type === "file") {
-
-      return (
-        <Button
-          compact
-          mode="outlined"
-          style={styles.fileBtn}
-          onPress={() => pickFile(field.name)}
-        >
-          {form[field.name] || "Upload"}
-        </Button>
-      );
-
-    }
-
     return null;
   };
 
   return (
 
     <>
-
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={styles.page}
         keyboardShouldPersistTaps="always"
       >
 
-        <Text style={styles.title}>Client Onboarding</Text>
-        <Text style={styles.subtitle}>
-          Enter the restaurant client information
-        </Text>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.title}>Client Onboarding</Text>
+            <Text style={styles.subtitle}>
+              Enter the restaurant client information
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => router.push("/admin/dashboard")}
+          >
+            <MaterialIcons name="arrow-back-ios-new" size={18} color="#111827" />
+            <Text style={styles.backText}>Back</Text>
+          </TouchableOpacity>
+        </View>
 
         {clientFormConfig.map((group, index) => (
 
@@ -303,24 +306,31 @@ export default function AddClientForm() {
 
         ))}
 
-        <View style={styles.buttons}>
+        <View style={styles.actionBar}>
 
-          <Button
-            compact
-            mode="outlined"
+          <Pressable
+            style={[
+              styles.cancelBtn,
+              hoverCancel && styles.cancelHover
+            ]}
             onPress={handleCancel}
+            onHoverIn={() => setHoverCancel(true)}
+            onHoverOut={() => setHoverCancel(false)}
           >
-            Cancel
-          </Button>
+            <Text style={styles.cancelText}>Cancel</Text>
+          </Pressable>
 
-          <Button
-            compact
-            mode="contained"
-            buttonColor="#2563EB"
+          <Pressable
+            style={[
+              styles.addBtn,
+              hoverAdd && styles.addHover
+            ]}
             onPress={handleAddClient}
+            onHoverIn={() => setHoverAdd(true)}
+            onHoverOut={() => setHoverAdd(false)}
           >
-            Add Client
-          </Button>
+            <Text style={styles.addText}>Add Client</Text>
+          </Pressable>
 
         </View>
 
@@ -344,7 +354,6 @@ export default function AddClientForm() {
       </Portal>
 
     </>
-
   );
 
 }
@@ -357,6 +366,31 @@ const styles = StyleSheet.create({
     paddingBottom: 120
   },
 
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24
+  },
+
+  backBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6
+  },
+
+  backText: {
+    marginLeft: 6,
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#111827"
+  },
+
   title: {
     fontSize: 26,
     fontWeight: "700",
@@ -365,8 +399,7 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: 13,
-    color: "#6B7280",
-    marginBottom: 24
+    color: "#6B7280"
   },
 
   card: {
@@ -418,16 +451,47 @@ const styles = StyleSheet.create({
     width: "100%"
   },
 
-  fileBtn: {
-    height: 36,
-    justifyContent: "center"
-  },
-
-  buttons: {
+  actionBar: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    gap: 10,
-    marginTop: 8
+    marginTop: 24,
+    gap: 14
+  },
+
+  cancelBtn: {
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    backgroundColor: "#FFFFFF"
+  },
+
+  cancelHover: {
+    backgroundColor: "#F3F4F6"
+  },
+
+  cancelText: {
+    fontSize: 13,
+    color: "#374151",
+    fontWeight: "500"
+  },
+
+  addBtn: {
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    backgroundColor: "#2563EB"
+  },
+
+  addHover: {
+    backgroundColor: "#1D4ED8"
+  },
+
+  addText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#ffffff"
   },
 
   toastContainer: {
