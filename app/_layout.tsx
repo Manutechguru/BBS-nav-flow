@@ -1,17 +1,31 @@
-import { Stack } from "expo-router";
-import { PaperProvider } from "react-native-paper";
-import { ClientsProvider } from "../src/context/ClientsContext";
+import { Stack } from "expo-router"
+import { PaperProvider } from "react-native-paper"
+
+import { ClientsProvider } from "../src/context/ClientsContext"
+import { ReportsProvider } from "../src/context/ReportsContext"
 
 export default function RootLayout() {
+
   return (
+
     <ClientsProvider>
-      <PaperProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false
-          }}
-        />
-      </PaperProvider>
+
+      <ReportsProvider>
+
+        <PaperProvider>
+
+          <Stack
+            screenOptions={{
+              headerShown: false
+            }}
+          />
+
+        </PaperProvider>
+
+      </ReportsProvider>
+
     </ClientsProvider>
-  );
+
+  )
+
 }

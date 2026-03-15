@@ -1,12 +1,13 @@
 import { Feather } from "@expo/vector-icons"
 import { useState } from "react"
 import {
-    Image,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  Linking,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native"
 
 import { useQRCodes } from "../../../context/QRCodesContext"
@@ -17,6 +18,30 @@ export default function QRCard({ qr }: any) {
   const [showQR, setShowQR] = useState(false)
 
   const isActive = qr.status === "active"
+
+  // Detect file type
+  const getFileType = () => {
+
+    const name = qr.fileName || ""
+    const ext = name.split(".").pop()?.toLowerCase()
+
+    if (["png", "jpg", "jpeg"].includes(ext)) return "image"
+    if (["pdf", "doc", "docx"].includes(ext)) return "document"
+
+    return "other"
+  }
+
+  const fileType = getFileType()
+
+  const handleView = () => {
+
+    if (fileType === "image") {
+      setShowQR(!showQR)
+    } else {
+      // Open document in new page
+      Linking.openURL(qr.image)
+    }
+  }
 
   return (
     <View style={styles.card}>
@@ -35,10 +60,10 @@ export default function QRCard({ qr }: any) {
         </Text>
       </View>
 
-      {/* QR Preview */}
+      {/* Preview */}
 
       <View style={styles.previewBox}>
-        {showQR ? (
+        {showQR && fileType === "image" ? (
           <Image source={{ uri: qr.image }} style={styles.image} />
         ) : (
           <View style={styles.hiddenBox}>
@@ -86,11 +111,13 @@ export default function QRCard({ qr }: any) {
 
         <TouchableOpacity
           style={styles.viewBtn}
-          onPress={() => setShowQR(!showQR)}
+          onPress={handleView}
         >
           <Feather name="eye" size={16} color="#2563eb" />
           <Text style={styles.viewText}>
-            {showQR ? "Hide" : "View"}
+            {fileType === "image"
+              ? showQR ? "Hide" : "View"
+              : "Open"}
           </Text>
         </TouchableOpacity>
 
@@ -121,7 +148,6 @@ const styles = StyleSheet.create({
     padding: 18,
     borderWidth: 1,
     borderColor: "#e5e7eb",
-
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 8,

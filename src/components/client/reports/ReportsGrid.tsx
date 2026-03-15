@@ -1,19 +1,40 @@
-import { StyleSheet, View } from "react-native"
-import { reportsData } from "../../../constants/reportsData"
+import { FlatList, StyleSheet, View } from "react-native"
 import ReportCard from "./ReportCard"
 
-export default function ReportsGrid() {
+export default function ReportsGrid({
+  reports,
+  onView,
+  onDownload,
+  onEdit,
+  onDelete
+}: any) {
 
   return (
-    <View style={styles.grid}>
 
-      {reportsData.map((report) => (
-        <View key={report.id} style={styles.cardWrapper}>
-          <ReportCard report={report} />
+    <FlatList
+      data={reports}
+      extraData={reports}
+      keyExtractor={(item) => item.id}
+      numColumns={3}
+      columnWrapperStyle={styles.row}
+      contentContainerStyle={styles.grid}
+      renderItem={({ item }) => (
+
+        <View style={styles.cardWrapper}>
+
+          <ReportCard
+            report={item}
+            onView={onView}
+            onDownload={onDownload}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+
         </View>
-      ))}
 
-    </View>
+      )}
+    />
+
   )
 
 }
@@ -21,14 +42,16 @@ export default function ReportsGrid() {
 const styles = StyleSheet.create({
 
   grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    paddingBottom: 40
+  },
+
+  row: {
     justifyContent: "space-between",
-    rowGap: 20
+    marginBottom: 20
   },
 
   cardWrapper: {
-    width: "31%"   // ensures 3 cards per row
+    width: "31%"
   }
 
 })

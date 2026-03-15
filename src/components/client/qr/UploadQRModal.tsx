@@ -1,13 +1,15 @@
-import * as ImagePicker from "expo-image-picker"
+import DateTimePicker from "@react-native-community/datetimepicker"
+import * as DocumentPicker from "expo-document-picker"
 import { useState } from "react"
 import {
-    Image,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Image,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native"
 
 import { useQRCodes } from "../../../context/QRCodesContext"
@@ -16,40 +18,58 @@ export default function UploadQRModal({ visible, onClose }: any) {
 
   const { addQR } = useQRCodes()
 
-  const [image, setImage] = useState<any>(null)
+  const [file, setFile] = useState<any>(null)
   const [paymentType, setPaymentType] = useState("")
   const [uploadedBy, setUploadedBy] = useState("")
-  const [date, setDate] = useState("")
+  const [date, setDate] = useState<Date>(new Date())
+  const [showPicker, setShowPicker] = useState(false)
 
-  const pickImage = async () => {
+  const formatDate = (d: Date) => {
+    if (!(d instanceof Date) || isNaN(d.getTime())) return ""
+    return d.toISOString().split("T")[0]
+  }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1
+  const pickFile = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "*/*",
+      copyToCacheDirectory: true
     })
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri)
+      setFile(result.assets[0])
     }
   }
 
   const handleAdd = () => {
 
-    if (!image || !paymentType || !uploadedBy || !date) return
+    const formattedDate = formatDate(date)
+
+    if (!file || !paymentType || !uploadedBy || !formattedDate) return
 
     const newQR = {
       id: Date.now().toString(),
       name: paymentType + " QR",
       paymentType,
       uploadedBy,
-      uploadDate: date,
-      image,
+      uploadDate: formattedDate,
+      image: file.uri,
+      fileName: file.name,
       status: "active"
     }
 
     addQR(newQR)
 
+    setFile(null)
+    setPaymentType("")
+    setUploadedBy("")
+    setDate(new Date())
+
     onClose()
+  }
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowPicker(false)
+    if (selectedDate) setDate(selectedDate)
   }
 
   return (
@@ -61,34 +81,97 @@ export default function UploadQRModal({ visible, onClose }: any) {
 
           <Text style={styles.title}>Upload New QR Code</Text>
 
-          <TouchableOpacity style={styles.uploadBtn} onPress={pickImage}>
-            <Text>Upload QR Image</Text>
+          {/* QR FILE */}
+          <Text style={styles.label}>QR File</Text>
+
+          <TouchableOpacity style={styles.uploadBtn} onPress={pickFile}>
+            <Text>Upload QR File</Text>
           </TouchableOpacity>
 
-          {image && (
-            <Image source={{ uri: image }} style={styles.preview} />
+          {file && (
+            <View style={styles.filePreview}>
+
+              {file.mimeType?.includes("image") && (
+                <Image source={{ uri: file.uri }} style={styles.preview} />
+              )}
+
+              <Text style={styles.fileName}>{file.name}</Text>
+
+            </View>
           )}
 
+          {/* PAYMENT TYPE */}
+          <Text style={styles.label}>Payment Type</Text>
+
           <TextInput
-            placeholder="Payment Type"
+            placeholder="Enter payment type"
+            placeholderTextColor="#9ca3af"
             style={styles.input}
             value={paymentType}
             onChangeText={setPaymentType}
           />
 
+          {/* UPLOADED BY */}
+          <Text style={styles.label}>Uploaded By</Text>
+
           <TextInput
-            placeholder="Uploaded By"
+            placeholder="Enter uploader name"
+            placeholderTextColor="#9ca3af"
             style={styles.input}
             value={uploadedBy}
             onChangeText={setUploadedBy}
           />
 
-          <TextInput
-            placeholder="Upload Date"
-            style={styles.input}
-            value={date}
-            onChangeText={setDate}
-          />
+          {/* DATE FIELD */}
+          <Text style={styles.label}>Upload Date</Text>
+
+          {Platform.OS === "web" ? (
+
+            <View style={styles.dateWrapper}>
+
+              <input
+                type="date"
+                value={formatDate(date)}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setDate(new Date(e.target.value))
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  border: "none",
+                  outline: "none",
+                  fontSize: "14px",
+                  background: "transparent",
+                  cursor: "pointer"
+                }}
+              />
+
+              <Text style={styles.calendarIcon}></Text>
+
+            </View>
+
+          ) : (
+
+            <>
+              <TouchableOpacity
+                style={styles.dateWrapper}
+                onPress={() => setShowPicker(true)}
+              >
+                <Text>{formatDate(date)}</Text>
+                <Text style={styles.calendarIcon}></Text>
+              </TouchableOpacity>
+
+              {showPicker && (
+                <DateTimePicker
+                  value={date}
+                  mode="date"
+                  display="default"
+                  onChange={onDateChange}
+                />
+              )}
+            </>
+          )}
 
           <View style={styles.actions}>
 
@@ -129,22 +212,39 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "700",
-    marginBottom: 16
+    marginBottom: 18
+  },
+
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 6,
+    color: "#374151"
   },
 
   uploadBtn: {
     backgroundColor: "#e5e7eb",
-    padding: 10,
+    padding: 12,
     borderRadius: 6,
     alignItems: "center",
-    marginBottom: 10
+    marginBottom: 14
   },
 
   preview: {
     width: 120,
     height: 120,
     alignSelf: "center",
-    marginBottom: 10
+    marginBottom: 8
+  },
+
+  filePreview: {
+    alignItems: "center",
+    marginBottom: 12
+  },
+
+  fileName: {
+    fontSize: 12,
+    color: "#374151"
   },
 
   input: {
@@ -152,13 +252,31 @@ const styles = StyleSheet.create({
     borderColor: "#e5e7eb",
     padding: 10,
     borderRadius: 6,
-    marginBottom: 10
+    marginBottom: 14
+  },
+
+  dateWrapper: {
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "white"
+  },
+
+  calendarIcon: {
+    fontSize: 16,
+    opacity: 0.6
   },
 
   actions: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    gap: 10
+    gap: 12
   },
 
   cancelBtn: {
@@ -167,7 +285,8 @@ const styles = StyleSheet.create({
 
   addBtn: {
     backgroundColor: "#2563eb",
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     borderRadius: 6
   }
 

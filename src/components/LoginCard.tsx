@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
@@ -14,7 +14,6 @@ import { useRouter } from "expo-router";
 
 import { detectLoginType } from "../hooks/useLoginDetect";
 import { loginUser } from "../utils/auth";
-
 
 export default function LoginScreen(){
 
@@ -30,7 +29,6 @@ const [step,setStep] = useState(1);
 const [countryOpen,setCountryOpen] = useState(false);
 const [search,setSearch] = useState("");
 
-
 const countries = [
 {code:"IN",name:"India",dial:"+91"},
 {code:"US",name:"United States",dial:"+1"},
@@ -40,6 +38,7 @@ const countries = [
 ];
 
 const [country,setCountry] = useState(countries[0]);
+
 useEffect(() => {
 
 const detectCountry = async () => {
@@ -198,6 +197,7 @@ name={loginType === "email" ? "mail" : "user"}
 size={18}
 color="#888"
 />
+
 <TextInput
 placeholder="Enter phone, email or username"
 style={styles.inputField}
@@ -224,6 +224,7 @@ onChangeText={setSearch}
 data={filteredCountries}
 keyExtractor={(item)=>item.code}
 renderItem={({item})=>(
+
 <TouchableOpacity
 style={styles.countryItem}
 onPress={()=>{
@@ -231,9 +232,12 @@ onPress={()=>{
  setCountryOpen(false)
 }}
 >
+
 <Text>{item.name}</Text>
 <Text>{item.dial}</Text>
+
 </TouchableOpacity>
+
 )}
 />
 
@@ -241,7 +245,7 @@ onPress={()=>{
 
 )}
 
-{/* PASSWORD FIELD FOR EMAIL/USERNAME */}
+{/* PASSWORD FIELD */}
 
 {loginType !== "phone" && loginInput !== "" && (
 
@@ -302,7 +306,20 @@ onPress={()=>{
 <Text style={styles.heading}>Verify Phone</Text>
 <Text style={styles.subHeading}>Enter OTP sent to your number</Text>
 
+<View style={styles.otpHeader}>
+
 <Text style={styles.label}>Enter OTP</Text>
+
+<TouchableOpacity
+onPress={()=>{
+ setStep(1)
+ setOtpValue("")
+}}
+>
+<Text style={styles.useAnother}>Use another?</Text>
+</TouchableOpacity>
+
+</View>
 
 <View style={styles.inputBox}>
 <TextInput
@@ -416,6 +433,18 @@ marginBottom:25
 
 label:{
 marginBottom:6
+},
+
+otpHeader:{
+flexDirection:"row",
+justifyContent:"space-between",
+alignItems:"center"
+},
+
+useAnother:{
+color:"#2563EB",
+fontSize:13,
+fontWeight:"500"
 },
 
 phoneRow:{

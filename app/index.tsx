@@ -1,12 +1,17 @@
-import { StyleSheet, View } from "react-native";
-import LoginCard from "../src/components/LoginCard";
+import { StyleSheet, View } from "react-native"
+import LoginCard from "../src/components/LoginCard"
+import { ReportsProvider } from "../src/context/ReportsContext"
 
 export default function LoginPage() {
 
   return (
-    <View style={styles.container}>
-      <LoginCard />
-    </View>
+    <ReportsProvider>
+
+      <View style={styles.container}>
+        <LoginCard />
+      </View>
+
+    </ReportsProvider>
   )
 }
 
