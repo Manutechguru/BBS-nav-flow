@@ -27,6 +27,9 @@ const [otpValue,setOtpValue] = useState("");
 const [step,setStep] = useState(1);
 const [resetStep,setResetStep] = useState(0);
 
+const [timer,setTimer] = useState(180);
+const [canResend,setCanResend] = useState(false);
+
 const [countryOpen,setCountryOpen] = useState(false);
 const [search,setSearch] = useState("");
 
@@ -64,6 +67,35 @@ console.log("Country detect error:", error);
 detectCountry();
 
 }, []);
+
+useEffect(()=>{
+
+if(step === 2){
+
+setTimer(180);
+setCanResend(false);
+
+const interval = setInterval(()=>{
+
+setTimer(prev => {
+
+if(prev <= 1){
+clearInterval(interval);
+setCanResend(true);
+return 0;
+}
+
+return prev - 1;
+
+});
+
+},1000);
+
+return ()=>clearInterval(interval);
+
+}
+
+},[step]);
 
 const filteredCountries = countries.filter(c =>
 c.name.toLowerCase().includes(search.toLowerCase())
@@ -129,6 +161,22 @@ alert("Login error");
 
 };
 
+const handleResendOtp = () => {
+
+setTimer(180);
+setCanResend(false);
+
+};
+
+const formatTime = (seconds) => {
+
+const m = Math.floor(seconds/60);
+const s = seconds % 60;
+
+return `${m}:${s < 10 ? "0"+s : s}`;
+
+};
+
 return(
 
 <View style={styles.page}>
@@ -142,7 +190,8 @@ return(
 <Text style={styles.logoText}>BBS</Text>
 </View>
 
-<Text style={styles.logoLabel}>Bojhan</Text> </View>
+<Text style={styles.logoLabel}>Bojhan</Text>
+</View>
 
 <Text style={styles.brandTitle}>
 Bojhan{"\n"}Billing System
@@ -152,11 +201,12 @@ Bojhan{"\n"}Billing System
 
 <View style={styles.rightPanel}>
 
-{step === 1 && resetStep === 0 && (
+{resetStep === 0 && step === 1 && (
 
 <View>
 
-<Text style={styles.heading}>Secure Login</Text> <Text style={styles.subHeading}>Enter your credentials to proceed</Text>
+<Text style={styles.heading}>Secure Login</Text>
+<Text style={styles.subHeading}>Enter your credentials to proceed</Text>
 
 <Text style={styles.label}>Phone / Email / Username</Text>
 
@@ -167,10 +217,10 @@ Bojhan{"\n"}Billing System
 <TouchableOpacity
 style={styles.countryBox}
 onPress={()=>setCountryOpen(!countryOpen)}
-
 >
 
-<Text style={styles.countryCode}>{country.code}</Text> <Text>{country.dial} ▼</Text>
+<Text style={styles.countryCode}>{country.code}</Text>
+<Text>{country.dial} ▼</Text>
 
 </TouchableOpacity>
 
@@ -230,10 +280,10 @@ onPress={()=>{
 setCountry(item)
 setCountryOpen(false)
 }}
-
 >
 
-<Text>{item.name}</Text> <Text>{item.dial}</Text>
+<Text>{item.name}</Text>
+<Text>{item.dial}</Text>
 
 </TouchableOpacity>
 
@@ -277,7 +327,6 @@ onChangeText={setPassword}
 <LinearGradient
 colors={["#2f6fed","#1a4db6"]}
 style={styles.button}
-
 >
 
 <TouchableOpacity
@@ -289,7 +338,6 @@ handleContinue();
 handleUserLogin();
 }
 }}
-
 >
 
 <Text style={styles.buttonText}>
@@ -308,7 +356,8 @@ handleUserLogin();
 
 <View>
 
-<Text style={styles.heading}>Verify Phone</Text> <Text style={styles.subHeading}>Enter OTP sent to your number</Text>
+<Text style={styles.heading}>Verify Phone</Text>
+<Text style={styles.subHeading}>Enter OTP sent to your number</Text>
 
 <View style={styles.otpHeader}>
 
@@ -319,10 +368,10 @@ onPress={()=>{
 setStep(1)
 setOtpValue("")
 }}
-
 >
 
-<Text style={styles.useAnother}>Use another?</Text> </TouchableOpacity>
+<Text style={styles.useAnother}>Use another?</Text>
+</TouchableOpacity>
 
 </View>
 
@@ -336,21 +385,25 @@ onChangeText={setOtpValue}
 </View>
 
 <View style={styles.resendContainer}>
-<TouchableOpacity onPress={handleContinue}>
+
+<Text style={styles.resendText}>
+Valid for {formatTime(timer)}
+</Text>
+
+<TouchableOpacity onPress={handleResendOtp}>
 <Text style={styles.resendLink}>Resend OTP</Text>
 </TouchableOpacity>
+
 </View>
 
 <LinearGradient
 colors={["#2f6fed","#1a4db6"]}
 style={styles.button}
-
 >
 
 <TouchableOpacity
 style={{width:"100%",alignItems:"center"}}
 onPress={handleUserLogin}
-
 >
 
 <Text style={styles.buttonText}>
@@ -364,7 +417,6 @@ Login →
 </View>
 
 )}
-
 {resetStep === 1 && (
 
 <View>
@@ -381,13 +433,11 @@ style={styles.inputField}
 <LinearGradient
 colors={["#2f6fed","#1a4db6"]}
 style={styles.button}
-
 >
 
 <TouchableOpacity
 style={{width:"100%",alignItems:"center"}}
 onPress={()=>setResetStep(2)}
-
 >
 
 <Text style={styles.buttonText}>
@@ -418,13 +468,11 @@ style={styles.inputField}
 <LinearGradient
 colors={["#2f6fed","#1a4db6"]}
 style={styles.button}
-
 >
 
 <TouchableOpacity
 style={{width:"100%",alignItems:"center"}}
 onPress={()=>setResetStep(3)}
-
 >
 
 <Text style={styles.buttonText}>
@@ -464,13 +512,11 @@ style={styles.inputField}
 <LinearGradient
 colors={["#2f6fed","#1a4db6"]}
 style={styles.button}
-
 >
 
 <TouchableOpacity
 style={{width:"100%",alignItems:"center"}}
 onPress={()=>setResetStep(0)}
-
 >
 
 <Text style={styles.buttonText}>
@@ -494,7 +540,6 @@ Save Password
 );
 
 }
-
 const styles = StyleSheet.create({
 page:{
 flex:1,
@@ -581,7 +626,7 @@ fontWeight:"500"
 
 resendContainer:{
 flexDirection:"row",
-justifyContent:"flex-end",
+justifyContent:"space-between",
 marginTop:-10,
 marginBottom:10
 },

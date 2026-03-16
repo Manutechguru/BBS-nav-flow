@@ -130,8 +130,7 @@ export default function AccessScreen() {
       {/* SUMMARY CARDS */}
 
       <AccessCards
-        managerCount={managerCount}
-        cashierCount={cashierCount}
+        accessState={accessState}
         total={actions.length}
       />
 

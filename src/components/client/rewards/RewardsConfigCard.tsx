@@ -1,23 +1,45 @@
-import { useState } from "react"
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { useEffect, useState } from "react"
+import {
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from "react-native"
 import { useRewards } from "../../../context/RewardsContext"
 
 export default function RewardsConfigCard() {
 
   const { config, saveConfig } = useRewards()
 
-  const [amount, setAmount] = useState(config.amount.toString())
-  const [points, setPoints] = useState(config.points.toString())
-  const [minBilling, setMinBilling] = useState(config.minBilling.toString())
+  const [amount, setAmount] = useState("")
+  const [points, setPoints] = useState("")
+  const [minBilling, setMinBilling] = useState("")
+  const [active, setActive] = useState(false)
 
-  const conversionRule = `₹${amount} = ${points} reward points`
+  /* LOAD CONFIG WHEN SCREEN OPENS */
+
+  useEffect(() => {
+
+    if (config) {
+      setAmount(config.amount?.toString() || "")
+      setPoints(config.points?.toString() || "")
+      setMinBilling(config.minBilling?.toString() || "")
+      setActive(config.active ?? false)
+    }
+
+  }, [config])
+
+  const conversionRule = `₹${amount || 0} = ${points || 0} reward points`
 
   const handleSave = () => {
 
     saveConfig({
       amount: Number(amount),
       points: Number(points),
-      minBilling: Number(minBilling)
+      minBilling: Number(minBilling),
+      active
     })
 
     alert("Rewards configuration saved")
@@ -27,37 +49,65 @@ export default function RewardsConfigCard() {
 
     <View style={styles.card}>
 
-      <Text style={styles.title}>Rewards Conversion Configuration</Text>
-      <Text style={styles.subtitle}>
-        Set the conversion rate from billing amount to reward points
-      </Text>
+      {/* HEADER */}
+
+      <View style={styles.headerRow}>
+
+        <View>
+          <Text style={styles.title}>Rewards Conversion Configuration</Text>
+          <Text style={styles.subtitle}>
+            Set the conversion rate from billing amount to reward points
+          </Text>
+        </View>
+
+        <View style={styles.toggleBox}>
+          <Text style={styles.toggleText}>
+            {active ? "Active" : "Inactive"}
+          </Text>
+
+          <Switch
+            value={active}
+            onValueChange={setActive}
+          />
+        </View>
+
+      </View>
+
+      {/* AMOUNT + POINTS */}
 
       <View style={styles.row}>
 
         <View style={styles.field}>
           <Text>Amount (₹)</Text>
+
           <TextInput
             value={amount}
             onChangeText={setAmount}
             style={styles.input}
             keyboardType="numeric"
           />
+
         </View>
 
         <View style={styles.field}>
           <Text>Reward Points</Text>
+
           <TextInput
             value={points}
             onChangeText={setPoints}
             style={styles.input}
             keyboardType="numeric"
           />
+
         </View>
 
       </View>
 
+      {/* MIN BILLING */}
+
       <View style={styles.field}>
         <Text>Minimum Billing for Rewards</Text>
+
         <TextInput
           value={minBilling}
           onChangeText={setMinBilling}
@@ -66,17 +116,23 @@ export default function RewardsConfigCard() {
         />
       </View>
 
+      {/* RULE */}
+
       <View style={styles.ruleBox}>
         <Text style={styles.ruleTitle}>Conversion Rule:</Text>
         <Text>{conversionRule}</Text>
       </View>
 
-      <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+      {/* SAVE */}
+
+      <TouchableOpacity
+        style={styles.saveBtn}
+        onPress={handleSave}
+      >
         <Text style={styles.saveText}>Save Configuration</Text>
       </TouchableOpacity>
 
     </View>
-
   )
 }
 
@@ -90,14 +146,30 @@ const styles = StyleSheet.create({
     borderColor: "#E5E7EB"
   },
 
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20
+  },
+
+  toggleBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10
+  },
+
+  toggleText: {
+    fontWeight: "600"
+  },
+
   title: {
     fontWeight: "700",
     fontSize: 16
   },
 
   subtitle: {
-    color: "#6b7280",
-    marginBottom: 20
+    color: "#6b7280"
   },
 
   row: {

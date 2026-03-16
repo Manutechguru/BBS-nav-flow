@@ -1,12 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState
 } from "react"
 
 import { reportsData } from "../constants/reportsData"
+
+/* ================= TYPES ================= */
 
 type Report = {
   id: string
@@ -29,9 +32,21 @@ type ReportsContextType = {
   loadReports: () => Promise<void>
 }
 
+type ProviderProps = {
+  children: ReactNode
+}
+
+/* ================= CONSTANTS ================= */
+
+const STORAGE_KEY = "reports"
+
+/* ================= CONTEXT ================= */
+
 const ReportsContext = createContext<ReportsContextType | undefined>(undefined)
 
-export function ReportsProvider({ children }: any) {
+/* ================= PROVIDER ================= */
+
+export function ReportsProvider({ children }: ProviderProps) {
 
   const [reports, setReports] = useState<Report[]>([])
 
@@ -39,50 +54,53 @@ export function ReportsProvider({ children }: any) {
     loadReports()
   }, [])
 
-  /* LOAD REPORTS */
+  /* ================= LOAD REPORTS ================= */
 
   const loadReports = async () => {
 
     try {
 
-      const stored = await AsyncStorage.getItem("reports")
+      const stored = await AsyncStorage.getItem(STORAGE_KEY)
+
+      let finalReports: Report[]
 
       if (stored) {
 
         const storedReports: Report[] = JSON.parse(stored)
 
-        const mergedReports = [
+        /* Merge default reports with stored reports */
+
+        finalReports = [
           ...reportsData,
           ...storedReports.filter(
-            (r: Report) =>
-              !reportsData.some((d: Report) => d.id === r.id)
+            (r) => !reportsData.some((d) => d.id === r.id)
           )
         ]
 
-        setReports(mergedReports)
-
       } else {
 
-        setReports(reportsData)
-
-        await AsyncStorage.setItem(
-          "reports",
-          JSON.stringify(reportsData)
-        )
+        finalReports = reportsData
 
       }
+
+      setReports(finalReports)
+
+      await AsyncStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(finalReports)
+      )
 
     } catch (error) {
 
       console.log("Error loading reports:", error)
+
       setReports(reportsData)
 
     }
 
   }
 
-
-  /* ADD REPORT */
+  /* ================= ADD REPORT ================= */
 
   const addReport = async (report: Report) => {
 
@@ -93,7 +111,7 @@ export function ReportsProvider({ children }: any) {
       setReports(updated)
 
       await AsyncStorage.setItem(
-        "reports",
+        STORAGE_KEY,
         JSON.stringify(updated)
       )
 
@@ -105,28 +123,30 @@ export function ReportsProvider({ children }: any) {
 
   }
 
-
-  /* DELETE REPORT */
+  /* ================= DELETE REPORT ================= */
 
   const deleteReport = async (id: string) => {
 
-  setReports((prev) => {
+    try {
 
-    const updated = prev.filter((r) => r.id !== id)
+      const updated = reports.filter((r) => r.id !== id)
 
-    AsyncStorage.setItem(
-      "reports",
-      JSON.stringify(updated)
-    )
+      setReports(updated)
 
-    return updated
+      await AsyncStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(updated)
+      )
 
-  })
+    } catch (error) {
 
-}
+      console.log("Error deleting report:", error)
 
+    }
 
-  /* UPDATE REPORT */
+  }
+
+  /* ================= UPDATE REPORT ================= */
 
   const updateReport = async (updatedReport: Report) => {
 
@@ -139,7 +159,7 @@ export function ReportsProvider({ children }: any) {
       setReports(updated)
 
       await AsyncStorage.setItem(
-        "reports",
+        STORAGE_KEY,
         JSON.stringify(updated)
       )
 
@@ -150,7 +170,6 @@ export function ReportsProvider({ children }: any) {
     }
 
   }
-
 
   return (
 
@@ -172,6 +191,7 @@ export function ReportsProvider({ children }: any) {
 
 }
 
+/* ================= HOOK ================= */
 
 export function useReports() {
 
