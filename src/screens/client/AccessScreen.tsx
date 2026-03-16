@@ -1,36 +1,125 @@
-import { useState } from "react"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { useEffect, useState } from "react"
 import { StyleSheet, Text, View } from "react-native"
 
 import AccessCards from "../../components/client/access/AccessCards"
 import AccessTable from "../../components/client/access/AccessTable"
-import { accessModules } from "../../constants/accessModules"
+
+const roles = [
+  "Manager",
+  "Cashier",
+  "Waiter/Captain",
+  "Kitchen Staff/Chef",
+  "Store Keeper"
+]
+
+const actions = [
+  "Reserve Table",
+  "Take Order",
+  "Billing",
+  "Receive Payment",
+  "Mark KOT Ready",
+  "Inventory Management",
+  "Change Roles",
+  "Reset Password",
+  "Reports",
+  "Dashboards",
+  "QR Code Input",
+  "Reward Points"
+]
 
 export default function AccessScreen() {
 
-  const initialState: any = {}
+  const createInitialState = () => {
 
-  accessModules.forEach((m) => {
-    initialState[m.id] = {
-      manager: true,
-      cashier: false
+    const state: any = {}
+
+    actions.forEach((action) => {
+
+      state[action] = {}
+
+      roles.forEach((role) => {
+        state[action][role] = false
+      })
+
+    })
+
+    return state
+  }
+
+  const [accessState, setAccessState] = useState<any>({})
+
+  /* LOAD SAVED PERMISSIONS */
+
+  useEffect(() => {
+
+    const loadPermissions = async () => {
+
+      try {
+
+        const saved = await AsyncStorage.getItem("access_permissions")
+
+        if (saved) {
+          setAccessState(JSON.parse(saved))
+        } else {
+          setAccessState(createInitialState())
+        }
+
+      } catch (error) {
+        console.log("Error loading permissions:", error)
+        setAccessState(createInitialState())
+      }
+
     }
-  })
 
-  const [accessState, setAccessState] = useState(initialState)
+    loadPermissions()
 
-  const managerCount = Object.values(accessState).filter(
-    (a: any) => a.manager
+  }, [])
+
+
+  /* SAVE PERMISSIONS WHEN STATE CHANGES */
+
+  useEffect(() => {
+
+    if (Object.keys(accessState).length === 0) return
+
+    const savePermissions = async () => {
+
+      try {
+
+        await AsyncStorage.setItem(
+          "access_permissions",
+          JSON.stringify(accessState)
+        )
+
+      } catch (error) {
+        console.log("Error saving permissions:", error)
+      }
+
+    }
+
+    savePermissions()
+
+  }, [accessState])
+
+
+  /* COUNTS FOR DASHBOARD CARDS */
+
+  const managerCount = actions.filter(
+    (a) => accessState[a]?.Manager
   ).length
 
-  const cashierCount = Object.values(accessState).filter(
-    (a: any) => a.cashier
+  const cashierCount = actions.filter(
+    (a) => accessState[a]?.Cashier
   ).length
+
 
   return (
 
     <View style={styles.container}>
 
-      {/* Header */}
+      {/* HEADER */}
+
       <View style={styles.header}>
         <Text style={styles.title}>Access Control</Text>
         <Text style={styles.subtitle}>
@@ -38,14 +127,16 @@ export default function AccessScreen() {
         </Text>
       </View>
 
-      {/* Cards */}
+      {/* SUMMARY CARDS */}
+
       <AccessCards
         managerCount={managerCount}
         cashierCount={cashierCount}
-        total={accessModules.length}
+        total={actions.length}
       />
 
-      {/* Table */}
+      {/* PERMISSION MATRIX */}
+
       <View style={styles.tableContainer}>
         <AccessTable
           accessState={accessState}

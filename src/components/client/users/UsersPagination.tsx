@@ -9,7 +9,7 @@ export default function UsersPagination() {
         <Text>{"< Prev"}</Text>
       </TouchableOpacity>
 
-      <Text>Page 1 of 5</Text>
+      <Text>Page 1 of 1</Text>
 
       <TouchableOpacity>
         <Text>{"Next >"}</Text>

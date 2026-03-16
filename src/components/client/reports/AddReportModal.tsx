@@ -1,13 +1,12 @@
 import { Feather } from "@expo/vector-icons"
-import * as DocumentPicker from "expo-document-picker"
 import { useEffect, useState } from "react"
 import {
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native"
 
 import { useReports } from "../../../context/ReportsContext"
@@ -19,7 +18,7 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
   const [title, setTitle] = useState("")
   const [createdBy, setCreatedBy] = useState("")
   const [type, setType] = useState("Sales")
-  const [file, setFile] = useState<any>(null)
+  const [path, setPath] = useState("")
 
   const [openType, setOpenType] = useState(false)
 
@@ -33,11 +32,12 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
       setTitle(editingReport.title)
       setCreatedBy(editingReport.by)
       setType(editingReport.category)
+      setPath(editingReport.path || "")
     } else {
       setTitle("")
       setCreatedBy("")
       setType("Sales")
-      setFile(null)
+      setPath("")
     }
 
   }, [editingReport])
@@ -65,26 +65,11 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
   const generatedDate = generateDate()
 
 
-  /* FILE PICKER */
-
-  const pickFile = async () => {
-
-    const result = await DocumentPicker.getDocumentAsync({
-      type: "*/*"
-    })
-
-    if (!result.canceled) {
-      setFile(result.assets[0])
-    }
-
-  }
-
-
-  /* SAVE REPORT (ADD OR UPDATE) */
+  /* SAVE REPORT */
 
   const handleSave = async () => {
 
-    if (!title || !createdBy) return
+    if (!title || !createdBy || !path) return
 
     const designMap: any = {
       Sales: { icon: "shopping-cart", color: "#3b82f6" },
@@ -107,11 +92,8 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
       period: editingReport ? editingReport.period : period,
       generated: editingReport ? editingReport.generated : generatedDate,
 
-      size: file?.size
-        ? (file.size / 1024 / 1024).toFixed(1) + " MB"
-        : editingReport?.size || "1.0 MB",
-
-      fileUri: file?.uri || editingReport?.fileUri || ""
+      path: path,
+      size: editingReport?.size || "1.0 MB"
 
     }
 
@@ -138,6 +120,8 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
             {editingReport ? "Edit Report" : "Add New Report"}
           </Text>
 
+          {/* TITLE */}
+
           <Text style={styles.label}>Report Title</Text>
 
           <TextInput
@@ -147,6 +131,8 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
             style={styles.input}
           />
 
+          {/* CREATED BY */}
+
           <Text style={styles.label}>Created By</Text>
 
           <TextInput
@@ -155,6 +141,8 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
             onChangeText={setCreatedBy}
             style={styles.input}
           />
+
+          {/* REPORT TYPE */}
 
           <Text style={styles.label}>Report Type</Text>
 
@@ -221,20 +209,18 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
 
           </View>
 
-          <Text style={styles.label}>Upload File</Text>
+          {/* UPLOAD PATH */}
 
-          <TouchableOpacity
-            style={styles.upload}
-            onPress={pickFile}
-          >
+          <Text style={styles.label}>Upload Path</Text>
 
-            <Feather name="upload" size={16} />
+          <TextInput
+            placeholder="Enter report file path"
+            value={path}
+            onChangeText={setPath}
+            style={styles.input}
+          />
 
-            <Text style={styles.uploadText}>
-              {file ? file.name : editingReport?.size ? "Replace file" : "Choose file"}
-            </Text>
-
-          </TouchableOpacity>
+          {/* ACTION BUTTONS */}
 
           <View style={styles.actions}>
 
@@ -250,7 +236,7 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
               onPress={handleSave}
             >
               <Text style={styles.addText}>
-                {editingReport ? "Update Report" : "Add Report"}
+                {editingReport ? "Update Report" : "Generate Report"}
               </Text>
             </TouchableOpacity>
 
@@ -265,7 +251,6 @@ export default function AddReportModal({ visible, onClose, editingReport }: any)
   )
 
 }
-
 
 const styles = StyleSheet.create({
 
@@ -363,24 +348,6 @@ const styles = StyleSheet.create({
   dropdownActiveText: {
     color: "#2563eb",
     fontWeight: "600"
-  },
-
-  upload: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    height: 44,
-    backgroundColor: "#fff",
-    marginBottom: 16
-  },
-
-  uploadText: {
-    fontSize: 14,
-    color: "#6b7280"
   },
 
   actions: {

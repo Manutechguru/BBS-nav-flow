@@ -1,15 +1,38 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native"
-import { accessModules } from "../../../constants/accessModules"
 import AccessRow from "./AccessRow"
+
+const roles = [
+  "Manager",
+  "Cashier",
+  "Waiter/Captain",
+  "Kitchen Staff/Chef",
+  "Store Keeper"
+]
+
+const actions = [
+  "Reserve Table",
+  "Take Order",
+  "Billing",
+  "Receive Payment",
+  "Mark KOT Ready",
+  "Inventory Management",
+  "Change Roles",
+  "Reset Password",
+  "Reports",
+  "Dashboards",
+  "QR Code Input",
+  "Reward Points"
+]
 
 export default function AccessTable({ accessState, setAccessState }: any) {
 
-  const toggleAccess = (moduleId: string, role: "manager" | "cashier") => {
+  const toggleAccess = (action: string, role: string) => {
+
     setAccessState((prev: any) => ({
       ...prev,
-      [moduleId]: {
-        ...prev[moduleId],
-        [role]: !prev[moduleId][role]
+      [action]: {
+        ...prev[action],
+        [role]: !prev[action]?.[role]
       }
     }))
   }
@@ -18,29 +41,32 @@ export default function AccessTable({ accessState, setAccessState }: any) {
 
     <View style={styles.container}>
 
-      {/* TABLE HEADER */}
-      <View style={styles.header}>
-        <Text style={styles.colModule}>Module / Feature</Text>
-        <Text style={styles.col}>Manager Access</Text>
-        <Text style={styles.col}>Cashier Access</Text>
+      {/* HEADER */}
+
+      <View style={styles.headerRow}>
+
+        <Text style={styles.headerAction}>Actions</Text>
+
+        {roles.map((role) => (
+          <Text key={role} style={styles.headerRole}>
+            {role}
+          </Text>
+        ))}
+
       </View>
 
-      {/* SCROLLABLE ROWS */}
-      <ScrollView
-        style={styles.rowsContainer}
-        contentContainerStyle={styles.rowsContent}
-        showsVerticalScrollIndicator={true}
-      >
 
-        {accessModules.map((item) => (
+      {/* MATRIX BODY */}
+
+      <ScrollView showsVerticalScrollIndicator>
+
+        {actions.map((action) => (
           <AccessRow
-            key={item.id}
-            module={item.module}
-            description={item.description}
-            managerAccess={accessState[item.id]?.manager}
-            cashierAccess={accessState[item.id]?.cashier}
-            onToggleManager={() => toggleAccess(item.id, "manager")}
-            onToggleCashier={() => toggleAccess(item.id, "cashier")}
+            key={action}
+            action={action}
+            roles={roles}
+            accessState={accessState}
+            toggleAccess={toggleAccess}
           />
         ))}
 
@@ -54,48 +80,32 @@ export default function AccessTable({ accessState, setAccessState }: any) {
 const styles = StyleSheet.create({
 
   container: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingTop: 10,
+    padding: 16,
     flex: 1,
-
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
     elevation: 2
   },
 
-  header: {
+  headerRow: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderColor: "#eee"
+    borderColor: "#eee",
+    paddingBottom: 10,
+    marginBottom: 6
   },
 
-  rowsContainer: {
-    flex: 1
-  },
-
-  rowsContent: {
-    paddingBottom: 10
-  },
-
-  colModule: {
-    flex: 2,
-    fontSize: 14,
+  headerAction: {
+    width: 200,
     fontWeight: "700",
-    color: "#333"
+    fontSize: 14
   },
 
-  col: {
+  headerRole: {
     flex: 1,
     textAlign: "center",
-    fontSize: 14,
     fontWeight: "700",
-    color: "#333"
+    fontSize: 13
   }
 
 })

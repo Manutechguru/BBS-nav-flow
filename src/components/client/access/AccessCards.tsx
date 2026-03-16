@@ -13,7 +13,7 @@ export default function AccessCards({ managerCount, cashierCount, total }: any) 
 
       {/* Manager Card */}
       <View style={[styles.card, styles.manager]}>
-        <Text style={styles.cardLabel}>Manager Permissions</Text>
+        <Text style={styles.cardLabel}>Manager</Text>
         <Text style={styles.cardValue}>
           {managerCount}/{total}
         </Text>
@@ -21,7 +21,7 @@ export default function AccessCards({ managerCount, cashierCount, total }: any) 
 
       {/* Cashier Card */}
       <View style={[styles.card, styles.cashier]}>
-        <Text style={styles.cardLabel}>Cashier Permissions</Text>
+        <Text style={styles.cardLabel}>Cashier</Text>
         <Text style={styles.cardValue}>
           {cashierCount}/{total}
         </Text>

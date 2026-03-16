@@ -19,6 +19,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
   const { addQR } = useQRCodes()
 
   const [file, setFile] = useState<any>(null)
+  const [paymentTitle, setPaymentTitle] = useState("")
   const [paymentType, setPaymentType] = useState("")
   const [uploadedBy, setUploadedBy] = useState("")
   const [date, setDate] = useState<Date>(new Date())
@@ -30,6 +31,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
   }
 
   const pickFile = async () => {
+
     const result = await DocumentPicker.getDocumentAsync({
       type: "*/*",
       copyToCacheDirectory: true
@@ -44,11 +46,11 @@ export default function UploadQRModal({ visible, onClose }: any) {
 
     const formattedDate = formatDate(date)
 
-    if (!file || !paymentType || !uploadedBy || !formattedDate) return
+    if (!file || !paymentTitle || !paymentType || !uploadedBy || !formattedDate) return
 
     const newQR = {
       id: Date.now().toString(),
-      name: paymentType + " QR",
+      name: paymentTitle,
       paymentType,
       uploadedBy,
       uploadDate: formattedDate,
@@ -60,6 +62,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
     addQR(newQR)
 
     setFile(null)
+    setPaymentTitle("")
     setPaymentType("")
     setUploadedBy("")
     setDate(new Date())
@@ -73,6 +76,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
   }
 
   return (
+
     <Modal visible={visible} transparent animationType="fade">
 
       <View style={styles.overlay}>
@@ -82,6 +86,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
           <Text style={styles.title}>Upload New QR Code</Text>
 
           {/* QR FILE */}
+
           <Text style={styles.label}>QR File</Text>
 
           <TouchableOpacity style={styles.uploadBtn} onPress={pickFile}>
@@ -89,6 +94,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
           </TouchableOpacity>
 
           {file && (
+
             <View style={styles.filePreview}>
 
               {file.mimeType?.includes("image") && (
@@ -98,9 +104,23 @@ export default function UploadQRModal({ visible, onClose }: any) {
               <Text style={styles.fileName}>{file.name}</Text>
 
             </View>
+
           )}
 
+          {/* PAYMENT TITLE */}
+
+          <Text style={styles.label}>Payment Title</Text>
+
+          <TextInput
+            placeholder="Enter payment title"
+            placeholderTextColor="#9ca3af"
+            style={styles.input}
+            value={paymentTitle}
+            onChangeText={setPaymentTitle}
+          />
+
           {/* PAYMENT TYPE */}
+
           <Text style={styles.label}>Payment Type</Text>
 
           <TextInput
@@ -112,6 +132,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
           />
 
           {/* UPLOADED BY */}
+
           <Text style={styles.label}>Uploaded By</Text>
 
           <TextInput
@@ -123,6 +144,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
           />
 
           {/* DATE FIELD */}
+
           <Text style={styles.label}>Upload Date</Text>
 
           {Platform.OS === "web" ? (
@@ -171,6 +193,7 @@ export default function UploadQRModal({ visible, onClose }: any) {
                 />
               )}
             </>
+
           )}
 
           <View style={styles.actions}>

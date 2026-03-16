@@ -1,35 +1,40 @@
-import { StyleSheet, Switch, Text, View } from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 export default function AccessRow({
-  module,
-  description,
-  managerAccess,
-  cashierAccess,
-  onToggleManager,
-  onToggleCashier
+  action,
+  roles,
+  accessState,
+  toggleAccess
 }: any) {
 
   return (
     <View style={styles.row}>
 
-      <View style={styles.module}>
-        <Text style={styles.moduleTitle}>{module}</Text>
-        <Text style={styles.description}>{description}</Text>
+      {/* ACTION NAME */}
+      <View style={styles.actionColumn}>
+        <Text style={styles.actionText}>{action}</Text>
       </View>
 
-      <View style={styles.toggle}>
-        <Switch
-          value={managerAccess}
-          onValueChange={onToggleManager}
-        />
-      </View>
+      {/* ROLE CHECKBOXES */}
+      {roles.map((role: string) => {
 
-      <View style={styles.toggle}>
-        <Switch
-          value={cashierAccess}
-          onValueChange={onToggleCashier}
-        />
-      </View>
+        const active = accessState[action]?.[role]
+
+        return (
+          <TouchableOpacity
+            key={role}
+            style={styles.checkboxContainer}
+            onPress={() => toggleAccess(action, role)}
+          >
+            <MaterialIcons
+              name={active ? "check-box" : "check-box-outline-blank"}
+              size={26}
+              color={active ? "#16a34a" : "#dc2626"}  // green / red
+            />
+          </TouchableOpacity>
+        )
+      })}
 
     </View>
   )
@@ -45,21 +50,17 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
 
-  module: {
-    flex: 2
+  actionColumn: {
+    width: 200
   },
 
-  moduleTitle: {
+  actionText: {
+    fontSize: 14,
     fontWeight: "600",
-    fontSize: 15
+    color: "#333"
   },
 
-  description: {
-    fontSize: 12,
-    color: "#777"
-  },
-
-  toggle: {
+  checkboxContainer: {
     flex: 1,
     alignItems: "center"
   }
