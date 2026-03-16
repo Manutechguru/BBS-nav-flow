@@ -3,12 +3,13 @@ import { Slot } from "expo-router"
 import { useState } from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming
 } from "react-native-reanimated"
 
 import ClientSidebar from "../../src/components/client/ClientSidebar"
+import { RewardsProvider } from "../../src/context/RewardsContext"
 
 export default function ClientLayout() {
 
@@ -25,7 +26,6 @@ export default function ClientLayout() {
     }
 
     setOpen(!open)
-
   }
 
   const sidebarStyle = useAnimatedStyle(() => ({
@@ -34,25 +34,29 @@ export default function ClientLayout() {
 
   return (
 
-    <View style={styles.container}>
+    <RewardsProvider>
 
-      {/* Sidebar */}
-      <Animated.View style={[styles.sidebar, sidebarStyle]}>
-        <ClientSidebar />
-      </Animated.View>
+      <View style={styles.container}>
 
-      {/* Main Content */}
-      <View style={styles.content}>
+        {/* Sidebar */}
+        <Animated.View style={[styles.sidebar, sidebarStyle]}>
+          <ClientSidebar />
+        </Animated.View>
 
-        <TouchableOpacity style={styles.menuBtn} onPress={toggleSidebar}>
-          <MaterialIcons name="menu" size={26} color="black" />
-        </TouchableOpacity>
+        {/* Main Content */}
+        <View style={styles.content}>
 
-        <Slot />
+          <TouchableOpacity style={styles.menuBtn} onPress={toggleSidebar}>
+            <MaterialIcons name="menu" size={26} color="black" />
+          </TouchableOpacity>
+
+          <Slot />
+
+        </View>
 
       </View>
 
-    </View>
+    </RewardsProvider>
 
   )
 

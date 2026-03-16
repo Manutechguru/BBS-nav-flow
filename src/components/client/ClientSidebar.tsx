@@ -1,11 +1,11 @@
 import { MaterialIcons } from "@expo/vector-icons"
 import { usePathname, useRouter } from "expo-router"
 import {
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native"
 
 export default function ClientSidebar() {
@@ -18,7 +18,8 @@ export default function ClientSidebar() {
     { label: "User Management", route: "/client/users" },
     { label: "Reports", route: "/client/reports" },
     { label: "Access Control", route: "/client/access" },
-    { label: "QR Management", route: "/client/qr" }
+    { label: "QR Management", route: "/client/qr" },
+    { label: "Rewards", route: "/client/rewards" } // ✅ NEW MENU
   ]
 
   const handleLogout = () => {

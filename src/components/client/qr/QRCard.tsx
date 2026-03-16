@@ -19,6 +19,36 @@ export default function QRCard({ qr }: any) {
 
   const isActive = qr.status === "active"
 
+  // FORMAT DATE (2026-12-20 -> 2026-Dec-20)
+  const formatDate = (dateString: string) => {
+
+    if (!dateString) return ""
+
+    const months = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
+    ]
+
+    // Case 1: YYYY-MM-DD
+    if (dateString.includes("-") && dateString.split("-")[0].length === 4) {
+
+      const [year, month, day] = dateString.split("-")
+      const monthText = months[parseInt(month) - 1]
+
+      return `${year}-${monthText}-${day}`
+    }
+
+    // Case 2: already formatted like 15-Feb-2026
+    if (dateString.includes("-") && dateString.split("-")[1].length === 3) {
+
+      const [day, month, year] = dateString.split("-")
+
+      return `${year}-${month}-${day}`
+    }
+
+    return dateString
+  }
+
   // Detect file type
   const getFileType = () => {
 
@@ -38,7 +68,6 @@ export default function QRCard({ qr }: any) {
     if (fileType === "image") {
       setShowQR(!showQR)
     } else {
-      // Open document in new page
       Linking.openURL(qr.image)
     }
   }
@@ -47,7 +76,6 @@ export default function QRCard({ qr }: any) {
     <View style={styles.card}>
 
       {/* Status Badge */}
-
       <View style={[
         styles.badge,
         isActive ? styles.activeBadge : styles.inactiveBadge
@@ -61,7 +89,6 @@ export default function QRCard({ qr }: any) {
       </View>
 
       {/* Preview */}
-
       <View style={styles.previewBox}>
         {showQR && fileType === "image" ? (
           <Image source={{ uri: qr.image }} style={styles.image} />
@@ -74,11 +101,9 @@ export default function QRCard({ qr }: any) {
       </View>
 
       {/* Title */}
-
       <Text style={styles.title}>{qr.name}</Text>
 
       {/* Details */}
-
       <View style={styles.infoRow}>
         <Feather name="credit-card" size={14} color="#6b7280" />
         <Text style={styles.detail}>Payment: {qr.paymentType}</Text>
@@ -91,11 +116,10 @@ export default function QRCard({ qr }: any) {
 
       <View style={styles.infoRow}>
         <Feather name="calendar" size={14} color="#6b7280" />
-        <Text style={styles.detail}>{qr.uploadDate}</Text>
+        <Text style={styles.detail}>{formatDate(qr.uploadDate)}</Text>
       </View>
 
       {/* Status Toggle */}
-
       <View style={styles.statusRow}>
         <Text style={styles.statusText}>Status</Text>
 
@@ -106,7 +130,6 @@ export default function QRCard({ qr }: any) {
       </View>
 
       {/* Actions */}
-
       <View style={styles.actions}>
 
         <TouchableOpacity

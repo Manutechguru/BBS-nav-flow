@@ -64,25 +64,49 @@ const styles = StyleSheet.create({
     color: "#374151"
   },
 
-  colName: { width: 180 },
+  colName: {
+    flex: 2,
+    paddingHorizontal: 10
+  },
 
-  colRole: { width: 120 },
+  colRole: {
+    flex: 1,
+    paddingHorizontal: 10
+  },
 
-  colPhone: { width: 150 },
+  colPhone: {
+    flex: 1.5,
+    paddingHorizontal: 10
+  },
 
-  colEmail: { width: 220 },
+  colEmail: {
+    flex: 2.5,
+    paddingHorizontal: 10
+  },
 
-  colStatus: { width: 120 },
+  colStatus: {
+    flex: 1,
+    paddingHorizontal: 10
+  },
 
-  colDate: { width: 150 },
+  colDate: {
+    flex: 1.5,
+    paddingHorizontal: 10
+  },
 
-  colLast: { width: 150 },
+  colLast: {
+    flex: 1.5,
+    paddingHorizontal: 10
+  },
 
   colToggle: {
-    width: 130,
+    flex: 1.5,
     alignItems: "center"
   },
 
-  colActions: { width: 120 }
+  colActions: {
+    flex: 1,
+    paddingHorizontal: 5
+  }
 
 })

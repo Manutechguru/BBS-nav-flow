@@ -6,10 +6,9 @@ import { useUsers } from "../../../context/UsersContext"
 import { formatLastActive } from "../../../utils/dateUtils"
 import EditUserModal from "./EditUserModal"
 
-export default function UsersRow({ user }: any) {
+export default function UsersRow({ user, roleNumber }: any) {
 
   const { toggleStatus, deleteUser, updateUser } = useUsers()
-
   const [openModal, setOpenModal] = useState(false)
 
   return (
@@ -21,7 +20,7 @@ export default function UsersRow({ user }: any) {
         </View>
 
         <View style={styles.colRole}>
-          <Text>{user.role}</Text>
+          <Text>{user.role} {roleNumber}</Text>
         </View>
 
         <View style={styles.colPhone}>
@@ -104,47 +103,47 @@ const styles = StyleSheet.create({
   },
 
   colName: {
-    width: 180,
+    flex: 2,
     paddingHorizontal: 10
   },
 
   colRole: {
-    width: 120,
+    flex: 1,
     paddingHorizontal: 10
   },
 
   colPhone: {
-    width: 150,
+    flex: 1.5,
     paddingHorizontal: 10
   },
 
   colEmail: {
-    width: 220,
+    flex: 2.5,
     paddingHorizontal: 10
   },
 
   colStatus: {
-    width: 120,
+    flex: 1,
     paddingHorizontal: 10
   },
 
   colDate: {
-    width: 150,
+    flex: 1.5,
     paddingHorizontal: 10
   },
 
   colLast: {
-    width: 150,
+    flex: 1.5,
     paddingHorizontal: 10
   },
 
   colToggle: {
-    width: 130,
+    flex: 1.5,
     alignItems: "center"
   },
 
   actions: {
-    width: 120,
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     gap: 16

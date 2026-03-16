@@ -20,50 +20,82 @@ export default function UsersTable({ search, role, status, page }: any) {
       user.role.toLowerCase().includes(search.toLowerCase())
 
     const roleMatch = role ? user.role === role : true
-
     const statusMatch = status ? user.status === status : true
 
     return searchMatch && roleMatch && statusMatch
   })
 
-  // Pagination logic
+  // Pagination
   const startIndex = (page - 1) * ITEMS_PER_PAGE
+
   const paginatedUsers = filteredUsers.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
   )
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
 
-      <View style={styles.table}>
+    <View style={styles.container}>
 
-        <UsersTableHeader />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
 
-        {paginatedUsers.length === 0 ? (
-          <Text style={styles.noData}>No users found</Text>
-        ) : (
-          paginatedUsers.map((user: any) => (
-            <UsersRow
-              key={user.id}
-              user={user}
-            />
-          ))
-        )}
+        <View style={styles.table}>
 
-      </View>
+          <UsersTableHeader />
 
-    </ScrollView>
+          {paginatedUsers.length === 0 ? (
+
+            <Text style={styles.noData}>No users found</Text>
+
+          ) : (
+
+            paginatedUsers.map((user: any, index: number) => {
+
+              // Count how many same-role users appear before this one
+              const roleNumber =
+                filteredUsers
+                  .slice(0, startIndex + index + 1)
+                  .filter((u: any) => u.role === user.role).length
+
+              return (
+                <UsersRow
+                  key={user.id}
+                  user={user}
+                  roleNumber={roleNumber}
+                />
+              )
+
+            })
+
+          )}
+
+        </View>
+
+      </ScrollView>
+
+    </View>
+
   )
 }
 
 const styles = StyleSheet.create({
 
+  container: {
+    flex: 1,
+    width: "100%"
+  },
+
   table: {
+    flex: 1,
+    width: "100%",
+    minWidth: 1100,
     backgroundColor: "#ffffff",
     borderRadius: 10,
-    paddingHorizontal: 10,
-    minWidth: 1200
+    paddingHorizontal: 10
   },
 
   noData: {
