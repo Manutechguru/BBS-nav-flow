@@ -19,7 +19,7 @@ export default function ClientSidebar() {
     { label: "Reports", route: "/client/reports" },
     { label: "Access Control", route: "/client/access" },
     { label: "QR Management", route: "/client/qr" },
-    { label: "Rewards", route: "/client/rewards" } // ✅ NEW MENU
+    { label: "Rewards", route: "/client/rewards" }
   ]
 
   const handleLogout = () => {
@@ -61,7 +61,7 @@ export default function ClientSidebar() {
         <View style={styles.profileRow}>
 
           <Image
-            source={{ uri: "https://i.pravatar.cc/100" }}
+            source={require("../../assets/images/avatar.png")}
             style={styles.avatar}
           />
 

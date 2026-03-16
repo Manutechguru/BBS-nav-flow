@@ -1,19 +1,20 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 
 export default function UsersPagination() {
 
   return (
     <View style={styles.container}>
 
-      <TouchableOpacity>
+      {/*<TouchableOpacity> */}
         <Text>{"< Prev"}</Text>
-      </TouchableOpacity>
+      {/*</TouchableOpacity> */}
 
       <Text>Page 1 of 1</Text>
 
-      <TouchableOpacity>
+      {/*<TouchableOpacity> */}
         <Text>{"Next >"}</Text>
-      </TouchableOpacity>
+      {/*</TouchableOpacity> */}
+     
 
     </View>
   )
