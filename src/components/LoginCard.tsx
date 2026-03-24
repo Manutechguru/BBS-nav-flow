@@ -13,7 +13,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 
 import { detectLoginType } from "../hooks/useLoginDetect";
-import { loginUser } from "../utils/auth";
+import {
+  loginWithPassword,
+  resetPassword,
+  sendLoginOtp,
+  sendResetOtp,
+  verifyLoginOtp,
+  verifyResetOtp
+} from "../utils/auth";
 
 export default function LoginScreen(){
 
@@ -21,6 +28,15 @@ const router = useRouter();
 
 const [password,setPassword] = useState("");
 const [loginInput,setLoginInput] = useState("");
+
+const getFullPhone = () => {
+  return country.dial + loginInput;
+};
+
+const getResetPhone = () => {
+  return country.dial + resetPhone;
+};
+
 const [loginType,setLoginType] = useState("username");
 const [otpValue,setOtpValue] = useState("");
 
@@ -32,6 +48,11 @@ const [canResend,setCanResend] = useState(false);
 
 const [countryOpen,setCountryOpen] = useState(false);
 const [search,setSearch] = useState("");
+
+const [resetPhone,setResetPhone] = useState("");
+const [resetOtp,setResetOtp] = useState("");
+const [newPassword,setNewPassword] = useState("");
+const [confirmPassword,setConfirmPassword] = useState("");
 
 const countries = [
 {code:"IN",name:"India",dial:"+91"},
@@ -50,6 +71,7 @@ const detectCountry = async () => {
 try {
 
 const res = await fetch("https://ipwho.is/");
+if (!res.ok) return;
 const data = await res.json();
 
 const found = countries.find(c => c.code === data.country_code);
@@ -117,12 +139,22 @@ setCountryOpen(false);
 
 };
 
-const handleContinue = () => {
+const handleContinue = async () => {
+
+try{
 
 if(loginType === "phone"){
+
+await sendLoginOtp(getFullPhone()); // 🔥 REAL BACKEND CALL
 setStep(2);
+
 }else{
 setStep(3);
+}
+
+}catch(error:any){
+console.log(error);
+alert(error?.response?.data?.message || "Failed to send OTP");
 }
 
 };
@@ -131,40 +163,59 @@ const handleUserLogin = async () => {
 
 try{
 
-const credential = loginType === "phone" ? otpValue : password;
+let user;
 
-const user = await loginUser(loginInput, credential, loginType);
+if(loginType === "phone"){
+
+user = await verifyLoginOtp(getFullPhone(), otpValue);
+
+}else{
+
+user = await loginWithPassword(loginInput, password);
+
+}
 
 if(!user){
 alert("Login Failed");
 return;
 }
 
-if(user.role === "super_admin"){
+const role = user.role?.toLowerCase();
+
+if(role === "super_admin"){
 router.push("/admin/dashboard");
 }
 
-else if(user.role === "client_admin"){
+else if(role === "admin" || role === "client_admin"){
 router.push("/client/dashboard");
 }
 
-else if(user.role === "staff"){
+else if(role === "staff"){
 router.push("/staff/dashboard");
 }
 
-}catch(error){
+}catch(error:any){
 
 console.log(error);
-alert("Login error");
+alert(error?.response?.data?.message || "Login error");
 
 }
 
 };
 
-const handleResendOtp = () => {
+const handleResendOtp = async () => {
+
+try{
+
+await sendLoginOtp(getFullPhone());
 
 setTimer(180);
 setCanResend(false);
+
+}catch(error){
+console.log(error);
+alert("Failed to resend OTP");
+}
 
 };
 
@@ -425,8 +476,9 @@ Login →
 
 <View style={styles.inputBox}>
 <TextInput
-placeholder="Phone Number"
-style={styles.inputField}
+  placeholder="Phone Number"
+  value={resetPhone}
+  onChangeText={setResetPhone}
 />
 </View>
 
@@ -437,7 +489,25 @@ style={styles.button}
 
 <TouchableOpacity
 style={{width:"100%",alignItems:"center"}}
-onPress={()=>setResetStep(2)}
+onPress={async () => {
+  try {
+
+    if (!resetPhone) {
+      alert("Enter phone number");
+      return;
+    }
+
+    const fullPhone = country.dial + resetPhone;
+
+    await sendResetOtp(fullPhone);
+
+    setResetStep(2);
+
+  } catch (err: any) {
+    console.log("SEND RESET OTP ERROR:", err?.response?.data || err);
+    alert(err?.response?.data?.message || "Failed to send OTP");
+  }
+}}
 >
 
 <Text style={styles.buttonText}>
@@ -462,6 +532,8 @@ Send OTP →
 <TextInput
 placeholder="Enter 6 digit OTP"
 style={styles.inputField}
+value={resetOtp}
+onChangeText={setResetOtp}
 />
 </View>
 
@@ -472,7 +544,30 @@ style={styles.button}
 
 <TouchableOpacity
 style={{width:"100%",alignItems:"center"}}
-onPress={()=>setResetStep(3)}
+onPress={async () => {
+  try {
+
+    if (!resetOtp) {
+      alert("Enter OTP");
+      return;
+    }
+
+    if (!resetPhone) {
+      alert("Phone missing");
+      return;
+    }
+
+    const fullPhone = country.dial + resetPhone;
+
+    await verifyResetOtp(fullPhone, resetOtp);
+
+    setResetStep(3);
+
+  } catch (err: any) {
+    console.log("VERIFY RESET OTP ERROR:", err?.response?.data || err);
+    alert(err?.response?.data?.message || "Invalid OTP");
+  }
+}}
 >
 
 <Text style={styles.buttonText}>
@@ -498,6 +593,8 @@ Verify OTP →
 secureTextEntry
 placeholder="New Password"
 style={styles.inputField}
+value={newPassword}
+onChangeText={setNewPassword}
 />
 </View>
 
@@ -506,6 +603,8 @@ style={styles.inputField}
 secureTextEntry
 placeholder="Confirm Password"
 style={styles.inputField}
+value={confirmPassword}
+onChangeText={setConfirmPassword}
 />
 </View>
 
@@ -516,7 +615,42 @@ style={styles.button}
 
 <TouchableOpacity
 style={{width:"100%",alignItems:"center"}}
-onPress={()=>setResetStep(0)}
+onPress={async () => {
+  try {
+
+    if (!resetPhone) {
+      alert("Phone missing");
+      return;
+    }
+
+    if (!resetOtp) {
+      alert("OTP missing");
+      return;
+    }
+
+    if (!newPassword || !confirmPassword) {
+      alert("Enter password");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    const fullPhone = country.dial + resetPhone;
+
+    await resetPassword(fullPhone, resetOtp, newPassword);
+
+    alert("Password updated successfully");
+
+    setResetStep(0);
+
+  } catch (err: any) {
+    console.log("RESET PASSWORD ERROR:", err?.response?.data || err);
+    alert(err?.response?.data?.message || "Reset failed");
+  }
+}}
 >
 
 <Text style={styles.buttonText}>

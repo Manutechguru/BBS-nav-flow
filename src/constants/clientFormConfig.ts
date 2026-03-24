@@ -22,7 +22,7 @@ export const clientFormConfig: GroupConfig[] = [
 ====================================================== */
 
 {
-group:"1. Client (Business) Basic Details",
+group:"Client (Business) Basic Details",
 fields:[
 {
 name:"restaurantBrandName",
@@ -87,12 +87,53 @@ type:"text"
 ]
 },
 
+
+{
+  group: "Admin User Creation",
+  fields: [
+    {
+      name: "admin_name",
+      label: "Admin Name",
+      type: "text",
+      required: true
+    },
+    {
+      name: "admin_phone",
+      label: "Admin Phone",
+      type: "text",
+      required: true
+    },
+    {
+      name: "admin_email",
+      label: "Admin Email",
+      type: "text",
+      required: true
+    },
+    {
+      name: "admin_username",
+      label: "Username",
+      type: "text",
+      required: true
+    },
+    {
+      name: "admin_password",
+      label: "Password",
+      type: "text",
+      required: true
+    },
+    {
+      name: "date_of_joining",
+      label: "Date of Joining",
+      type: "calendar"
+    }
+  ]
+},
 /* ======================================================
    2. Restaurant Location & Address Details
 ====================================================== */
 
 {
-group:"2. Restaurant Location & Address Details",
+group:"Restaurant Location & Address Details",
 fields:[
 {
 name:"registeredAddress",
@@ -152,7 +193,7 @@ options:["IST","UTC","PST","EST"]
 ====================================================== */
 
 {
-group:"3. Outlet & Operational Configuration",
+group:"Outlet & Operational Configuration",
 fields:[
 {
 name:"numberOfOutlets",
@@ -203,7 +244,7 @@ options:["Yes","No"]
 ====================================================== */
 
 {
-group:"4. Business & Tax Information",
+group:"Business & Tax Information",
 fields:[
 {
 name:"gstNumber",
@@ -245,7 +286,7 @@ remarks:"1-100"
 ====================================================== */
 
 {
-group:"5. Subscription & Billing Details",
+group:"Subscription & Billing Details",
 fields:[
 {
 name:"subscriptionPlan",
@@ -310,7 +351,7 @@ options:["Yes","No"]
 ====================================================== */
 
 {
-group:"6. Feature Access & Permissions",
+group:"Feature Access & Permissions",
 fields:[
 {
 name:"enabledModules",
@@ -350,7 +391,7 @@ options:["Yes","No"]
 ====================================================== */
 
 {
-group:"7. User & Role Setup",
+group:"User & Role Setup",
 fields:[
 {
 name:"adminUserDetails",
@@ -379,7 +420,7 @@ options:["Password","OTP","Both"]
 ====================================================== */
 
 {
-group:"8. Branding & App Customization",
+group:"Branding & App Customization",
 fields:[
 {
 name:"restaurantLogo",
@@ -416,7 +457,7 @@ remarks:"Numeric Only"
 ====================================================== */
 
 {
-group:"9. Compliance & Agreements",
+group:"Compliance & Agreements",
 fields:[
 {
 name:"agreementStatus",
@@ -442,7 +483,7 @@ type:"file"
 ====================================================== */
 
 {
-group:"10. Internal Admin Tracking",
+group:"Internal Admin Tracking",
 fields:[
 {
 name:"clientId",
@@ -487,7 +528,7 @@ type:"text"
 ====================================================== */
 
 {
-group:"11. Nice-to-Have / Future Enhancements",
+group:"Nice-to-Have / Future Enhancements",
 fields:[
 {
 name:"franchiseParentId",
