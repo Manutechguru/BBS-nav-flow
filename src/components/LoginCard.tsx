@@ -161,45 +161,40 @@ alert(error?.response?.data?.message || "Failed to send OTP");
 
 const handleUserLogin = async () => {
 
-try{
+  try {
 
-let user;
+    let user;
 
-if(loginType === "phone"){
-
-user = await verifyLoginOtp(getFullPhone(), otpValue);
-
-}else{
-
-user = await loginWithPassword(loginInput, password);
-
+if (loginType === "phone") {
+  user = await verifyLoginOtp(getFullPhone(), otpValue);
+} else {
+  user = await loginWithPassword(loginInput, password);
 }
 
-if(!user){
-alert("Login Failed");
-return;
+if (!user) {
+  throw new Error("Login failed");
 }
 
-const role = user.role?.toLowerCase();
+    const role = user.role?.toLowerCase();
 
-if(role === "super_admin"){
-router.push("/admin/dashboard");
-}
+    if (role === "super_admin") {
+      router.push("/admin/dashboard");
+    }
 
-else if(role === "admin" || role === "client_admin"){
-router.push("/client/dashboard");
-}
+    else if (role === "admin" || role === "client_admin") {
+      router.push("/client/dashboard");
+    }
 
-else if(role === "staff"){
-router.push("/staff/dashboard");
-}
+    else if (role === "staff") {
+      router.push("/staff/dashboard");
+    }
 
-}catch(error:any){
+  } catch (error: any) {
 
-console.log(error);
-alert(error?.response?.data?.message || "Login error");
+    console.log(error);
+    alert(error?.response?.data?.message || "Login error");
 
-}
+  }
 
 };
 

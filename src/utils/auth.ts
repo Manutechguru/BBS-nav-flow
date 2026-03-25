@@ -37,13 +37,26 @@ export const loginWithPassword = async (
     throw new Error("Invalid login response");
   }
 
-  if (response.data.accessToken) {
-    localStorage.setItem("accessToken", response.data.accessToken);
+  // 🔥 CLEAR OLD TOKENS FIRST
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+
+  const accessToken = response.data.accessToken;
+  const refreshToken = response.data.refreshToken;
+
+  if (accessToken) {
+    localStorage.setItem("accessToken", accessToken);
   }
 
-  if (response.data.refreshToken) {
-    localStorage.setItem("refreshToken", response.data.refreshToken);
+  if (refreshToken) {
+    localStorage.setItem("refreshToken", refreshToken);
+  } else {
+    console.warn("⚠️ No refresh token received from backend");
   }
+
+  // 🔥🔥🔥 THIS IS THE MISSING PIECE
+  localStorage.setItem("identifier", identifier);
+  localStorage.setItem("password", password);
 
   return response.data.user;
 };
@@ -70,12 +83,25 @@ export const verifyLoginOtp = async (phone: string, otp: string) => {
 
   const response = res.data;
 
-  if (response?.data?.accessToken) {
-    localStorage.setItem("accessToken", response.data.accessToken);
+  if (!response?.data?.user) {
+    throw new Error("Invalid OTP login response");
   }
 
-  if (response?.data?.refreshToken) {
-    localStorage.setItem("refreshToken", response.data.refreshToken);
+  // 🔥 CLEAR OLD TOKENS FIRST
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+
+  const accessToken = response.data.accessToken;
+  const refreshToken = response.data.refreshToken;
+
+  if (accessToken) {
+    localStorage.setItem("accessToken", accessToken);
+  }
+
+  if (refreshToken) {
+    localStorage.setItem("refreshToken", refreshToken);
+  } else {
+    console.warn("⚠️ No refresh token received from backend");
   }
 
   return response.data.user;
