@@ -198,6 +198,7 @@ const mapFormToBackend = (form: any) => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarType, setSnackbarType] = useState<"error" | "success">("success");
+  const [manualOverride, setManualOverride] = useState<any>({});
 
   const showSnackbar = (message: string, type: "error" | "success") => {
     setSnackbarMessage(message);
@@ -219,21 +220,65 @@ const mapFormToBackend = (form: any) => {
     fetchPlans();
   }, []);
 
+  const autoMap: any = {
+    contactPersonName: "admin_name",
+    mobilePrimary: "admin_phone",
+    emailPrimary: "admin_email",
+    admin_username: "adminUserDetails"
+  };
+  
+
   const updateField = (name: string, value: any) => {
 
-    setForm((prev: any) => ({
+  setForm((prev: any) => {
+    let updated = {
       ...prev,
       [name]: value
-    }));
+    };
 
-    if (errors[name]) {
-      setErrors((prev: any) => {
-        const copy = { ...prev };
-        delete copy[name];
-        return copy;
-      });
+    /* =========================
+        AUTO MAPPING (CLEAN)
+    ========================= */
+
+    const targetField = autoMap[name];
+
+    if (targetField && !manualOverride[targetField]) {
+      updated[targetField] = value;
     }
-  };
+
+    return updated;
+  });
+
+  /* =========================
+      MANUAL OVERRIDE TRACKING
+  ========================= */
+
+  if (
+    [
+      "admin_name",
+      "admin_phone",
+      "admin_email",
+      "adminUserDetails"
+    ].includes(name)
+  ) {
+    setManualOverride((prev: any) => ({
+      ...prev,
+      [name]: true
+    }));
+  }
+
+  /* =========================
+      ERROR CLEANUP
+  ========================= */
+
+  if (errors[name]) {
+    setErrors((prev: any) => {
+      const copy = { ...prev };
+      delete copy[name];
+      return copy;
+    });
+  }
+};
 
   const handleCancel = () => {
     router.back();
