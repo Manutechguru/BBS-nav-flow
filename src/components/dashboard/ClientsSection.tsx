@@ -1,13 +1,13 @@
 import { StyleSheet, View } from "react-native";
 import ClientsTable from "./ClientsTable";
 
-export default function ClientsSection({ columns }: any) {
+export default function ClientsSection({ columns, clients }: any) {
 
   return (
 
     <View style={styles.container}>
 
-      <ClientsTable columns={columns} />
+      <ClientsTable columns={columns} clients={clients} />
 
     </View>
 

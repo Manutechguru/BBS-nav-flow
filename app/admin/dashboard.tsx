@@ -2,24 +2,43 @@ import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 
 import ClientsSection from "../../src/components/dashboard/ClientsSection";
+import CustomizeColumnsModal from "../../src/components/dashboard/CustomizeColumnsModal";
 import DashboardHeader from "../../src/components/dashboard/DashboardHeader";
 import StatsCards from "../../src/components/dashboard/StatsCards";
 
-import CustomizeColumnsModal from "../../src/components/dashboard/CustomizeColumnsModal";
+import { getDashboardClients } from "../../src/utils/dashboard";
 
 import {
-    COLUMN_STORAGE_KEY,
-    defaultColumns,
-    mergeSavedColumns
+  COLUMN_STORAGE_KEY,
+  defaultColumns,
+  mergeSavedColumns
 } from "../../src/constants/clientColumns";
 
 export default function Dashboard() {
+
+  // 🔥 CLIENT DATA FROM BACKEND
+  const [clients, setClients] = useState<any[]>([]);
 
   // Column configuration (visibility + order)
   const [columns, setColumns] = useState<any[]>([]);
 
   // Controls modal visibility
   const [showCustomize, setShowCustomize] = useState(false);
+
+  // 🔥 FETCH CLIENTS FROM BACKEND
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const data = await getDashboardClients();
+        console.log("CLIENTS:", data);
+        setClients(data || []);
+      } catch (err) {
+        console.log("Fetch error:", err);
+      }
+    };
+
+    fetchClients();
+  }, []);
 
   // LOAD saved column settings
   useEffect(() => {
@@ -59,11 +78,11 @@ export default function Dashboard() {
         onCustomizeColumns={() => setShowCustomize(true)}
       />
 
-      {/* STATS CARDS */}
-      <StatsCards />
+      {/* 🔥 STATS CARDS (NOW DYNAMIC) */}
+      <StatsCards clients={clients} />
 
-      {/* CLIENTS TABLE */}
-      <ClientsSection columns={columns} />
+      {/* 🔥 CLIENTS TABLE (NOW API DATA) */}
+      <ClientsSection columns={columns} clients={clients} />
 
       {/* CUSTOMIZE COLUMNS MODAL */}
       <CustomizeColumnsModal

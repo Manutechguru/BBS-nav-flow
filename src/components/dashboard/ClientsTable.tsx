@@ -25,42 +25,39 @@ export default function ClientsTable({ columns }: any) {
   /* ---------- NORMALIZE CLIENT DATA ---------- */
 
   const normalizeClient = (client: any) => ({
-    ...client,
+  id: client.client_id ?? client.id,
 
-    restaurantName:
-      client.restaurantName || client.restaurantBrandName,
+  restaurantName:
+    client.restaurantName ??
+    client.restaurantBrandName ??
+    client.restaurant_name ??
+    "N/A",
 
-    clientName:
-      client.clientName || client.contactPersonName,
+  clientName:
+    client.clientName ??
+    client.contactPersonName ??
+    client.client_name ??
+    "N/A",
 
-    city:
-      client.city || client.registeredCity,
+  city: client.city ?? "N/A",
+  phone: client.phone ?? "N/A",
+  email: client.email ?? "N/A",
 
-    phone:
-      client.phone ||
-      client.contactPhone ||
-      client.registeredPhone ||
-      client.phoneNumber,
+  numberOfOutlets: client.outlets ?? 0,
 
-    email:
-      client.email ||
-      client.registeredEmail ||
-      client.contactEmail,
+  paymentStatus: client.payment_status ?? "N/A",
+  status: client.status ?? "N/A",
 
-    nextRenewal:
-      client.nextRenewal || client.subscriptionEndDate,
+  onboardingDate: client.onboarding_date ?? "N/A",
+  nextRenewal: client.next_renewal ?? "N/A",
+  lastPaidDate: client.last_paid_date ?? "N/A"
+});
 
-    dateOfOnboarding:
-      client.dateOfOnboarding || client.onboardingDate,
+  const normalizedClients = (clients || []).map(normalizeClient);
 
-    lastPaid:
-      client.lastPaid || client.lastPaymentDate,
+  console.log("NORMALIZED CLIENTS:", normalizedClients);
 
-    status:
-      client.status || client.accountStatus
-  });
-
-  const normalizedClients = clients.map(normalizeClient);
+  console.log("TABLE CLIENTS RAW:", clients);
 
   /* ---------- DYNAMIC SEARCH (ALL VISIBLE COLUMNS) ---------- */
 
@@ -150,7 +147,10 @@ export default function ClientsTable({ columns }: any) {
 
               {visibleColumns.map((col: any) => {
 
-                const value = item[col.key] ?? "—";
+                const value =
+                  item[col.key] === null || item[col.key] === undefined || item[col.key] === ""
+                    ? "N/A"
+                    : item[col.key];
 
                 if (col.key === "restaurantName") {
 
@@ -192,7 +192,7 @@ export default function ClientsTable({ columns }: any) {
 
                     <View key={col.key} style={styles.cell}>
                       <Text style={styles.statusBadge}>
-                        {value}
+                         {value?.toUpperCase() === "ACTIVE" ? "Active" : "Inactive"}
                       </Text>
                     </View>
 
@@ -208,7 +208,7 @@ export default function ClientsTable({ columns }: any) {
 
                       <Text
                         style={
-                          value === "Paid"
+                          value?.toUpperCase() === "PAID"
                             ? styles.paidBadge
                             : styles.dueBadge
                         }
